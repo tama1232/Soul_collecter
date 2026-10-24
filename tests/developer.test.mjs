@@ -113,3 +113,14 @@ test('client developer tools bind to authenticated UID and report settings/file 
   await developerService.sync();assert.equal(reported.length,2);assert.equal(getProbabilities().normal[5],.03);
  }finally{developerService.clear();globalThis.fetch=originalFetch;globalThis.CONTRACT_CONFIG=originalConfig;applyProbabilities(DEFAULT_PROBABILITIES,0);}
 });
+
+test('online login stays available while undeployed developer functions fail closed without network calls',async()=>{
+ const {developerService}=await import('../src/systems/developer-service.js');
+ const previousConfig=globalThis.CONTRACT_CONFIG,previousFetch=globalThis.fetch;
+ const store={session:{kind:'firebase',uid:'player'},authToken:async()=>({uid:'player',idToken:'fixture-only'})};
+ developerService.attach(store,()=>({save:createSave(),persist(){}}));
+ globalThis.CONTRACT_CONFIG={firebase:{projectId:'unit-only'},functionsEnabled:false};
+ globalThis.fetch=()=>{throw new Error('Undeployed functions must not be requested');};
+ try {assert.equal(await developerService.sync(),null);assert.equal(developerService.authorized,false);await assert.rejects(()=>developerService.redeem(ROOT),/아직 활성화/);}
+ finally {developerService.clear();globalThis.CONTRACT_CONFIG=previousConfig;globalThis.fetch=previousFetch;}
+});

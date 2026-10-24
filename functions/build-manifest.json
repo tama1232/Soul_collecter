@@ -1,7 +1,7 @@
 {
-  "version": "soul-collecter-0.5.0",
+  "version": "soul-collecter-0.5.1",
   "files": {
-    "config.js": "011b2b7bb14880e3869f0179b4fa69a9aa0ba6f654b71e93929955171b3af792",
+    "config.js": "6502313aad304b8ba42ec6ba7b89f488bb16568534c14efdf365d508e50f4b82",
     "src/art/arien.js": "a978dc4024f654211d98e5634c64d92700bb4c58ed2f9b4caa0594fbe109b65f",
     "src/art/ashen.js": "2639ec7b17264967613d6ba40338e946ec0a255657ea2fd257c8f0d80ebd43f3",
     "src/art/astral.js": "00166e6613e125a517a72c2b4b9b0169682957824e72e623b16f05dd8fbddbb6",
@@ -26,7 +26,7 @@
     "src/config/probability-rules.js": "e8996e672a1428de56708865aeb8944bc9fb443da8002bbcf5dd6953ece38299",
     "src/config/ranking-rules.js": "b46500e07b8ddd88e449d1877a24a90bf56f0699b36d1a67f4b88a0c8f346053",
     "src/config/sprites.js": "0042c87b30fcb675dc1abdd3ff980d20cac7a9cd363c3d24bf3b9809558974b5",
-    "src/config/version.js": "f28579d28bcf94d57813493e64eff220e0b38c6ea553386ca5808f118c7207be",
+    "src/config/version.js": "150ceb6171f041014c75baeff07d564ab7a9f935418788248aa45d258fdea83a",
     "src/engine/loop.js": "3120e430380309a606c99195b8986d44c63ed73da4a8d83a465a6f7d9dc9b1a0",
     "src/engine/render-utils.js": "c1224b6eea9a5b2ac3fa12af693f9c08ff6ff0d6406c10b861e075db86c321a5",
     "src/engine/renderer.js": "9d5a50ebc5ff1c62cd53f1d60bbb374bab451765882b830369208178a42e32ab",
@@ -41,7 +41,7 @@
     "src/features/weapon-pickup.js": "35c4c3aa0ac904999d1db5f815546463da3dbe4970f10467056a1ec110784302",
     "src/game-data.js": "0d8c6ccfa5a41a5c6d69fda21aa5e4122dcd1d327bce43fd2677eb086ca2bffd",
     "src/game.js": "94223101bb0c96ee854cdd6c5262c777f3e41bf313e2db41818f002c38efbec9",
-    "src/systems/developer-service.js": "2eb38b2a803622e3bade4276d28bedcff2956a283a1b3c2346d28b212589b9e5",
+    "src/systems/developer-service.js": "c688da0543a42f900c1cc3bc9d20679b7aca0da7cb3428cd05576d7d188ce30a",
     "src/systems/progression.js": "33635ffaa6936836fbfed35e71fbdf3332af49be58da53b7350d3114f54bf742",
     "src/systems/rank-titles.js": "a5b8b0db8a2f3e91d4db3f8e60bb42228bc1761011290d39ff9773b66ace9233",
     "src/systems/weekly.js": "d890c5ed7179be176ff075c0b288dd1368c563cc9099293f1908ccf8667c14da"

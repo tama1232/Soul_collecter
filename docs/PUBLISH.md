@@ -32,7 +32,9 @@ ZIP 파일 자체를 웹서버에 올리는 것으로는 실행되지 않습니�
 
 ## 온라인 계정·전체 순위·일요일 보상 켜기
 
-정적 호스팅과 온라인 데이터 서버는 별도입니다. 현재 배포본의 `public/config.js`에는 Firebase 프로젝트가 비어 있어 로컬 계정으로 동작합니다.
+정적 호스팅과 온라인 데이터 서버는 별도입니다. Firebase 프로젝트는 `soul-collecter-c2ba0`이며 웹 앱 설정이 `public/config.js`에 연결되어 있습니다. 이메일/비밀번호 로그인과 기본 데이터베이스는 생성되어 있고 데이터베이스 위치는 서울(`asia-northeast3`)입니다. 승인된 게임 도메인은 `tama1232.github.io`입니다.
+
+Cloud Functions 배포 전에는 `functionsEnabled: false`로 두어 일반 로그인에서 배포되지 않은 개발자 API를 호출하지 않습니다. 주간 자동 보상·칭호 정산 및 개발자 코드 사용에는 Blaze 요금제와 Functions 배포가 필요합니다. 배포 후 `functionsEnabled: true`로 전환하고 다시 빌드합니다.
 
 1. 본인 Firebase 프로젝트를 만들고 Authentication에서 Email/Password를 켭니다. Cloud Firestore를 생성합니다.
 2. Firebase Console에서 웹 앱을 등록하고 `public/config.js`의 firebase.apiKey, firebase.projectId에 그 프로젝트 값을 넣습니다. 이 웹 설정은 공개 값입니다. 서비스 계정 키와 관리자 비밀번호는 클라이언트나 GitHub에 넣지 않습니다.
