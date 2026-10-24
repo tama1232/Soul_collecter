@@ -1,5 +1,5 @@
 {
-  "version": "book-of-forgotten-names-0.7.0",
+  "version": "soul-collecter-0.7.1",
   "files": {
     "config.js": "bc48973387edfd771c4648e61d935c6baa1acdae8f5bd6f6c30f93f1e769b47b",
     "src/art/arien.js": "a978dc4024f654211d98e5634c64d92700bb4c58ed2f9b4caa0594fbe109b65f",
@@ -29,7 +29,7 @@
     "src/config/ranking-rules.js": "12f3b30c6a675ae4f74d6e9d2a3b62df2a5bdc89218a2b0643d44de6b2f489b9",
     "src/config/sprites.js": "0042c87b30fcb675dc1abdd3ff980d20cac7a9cd363c3d24bf3b9809558974b5",
     "src/config/story-balance.js": "ade16c677ac72ab8742ea0966ae08e8237f01511b6b3b4278fd42ea2fdb1ad16",
-    "src/config/version.js": "79431eef56aeb9ea5488669db784ea06d74127e2371811963da3614f1e28ce9d",
+    "src/config/version.js": "a177f45e21c86b253bc645973d43e6ba7b599e13a095306f6d3fb2c73cb1f8b7",
     "src/engine/collision.js": "8522df38d5387f56dd08a3a4339dd86b033334864b71eabca62bbd83bf9e86c7",
     "src/engine/loop.js": "3120e430380309a606c99195b8986d44c63ed73da4a8d83a465a6f7d9dc9b1a0",
     "src/engine/menu-icons.js": "dba8c44d4e28608b15b631ba077adb5c35c0e078e8048b7d00b1a8470505387c",
@@ -46,7 +46,7 @@
     "src/features/upgrades.js": "cef2860569a2e3ff566d2896cb703bb2de8ecb882e2a7b03dfba8761b02dc71c",
     "src/features/weapon-pickup.js": "35c4c3aa0ac904999d1db5f815546463da3dbe4970f10467056a1ec110784302",
     "src/game-data.js": "5c790214f9739ba27ae8708cac120627ec2afe7cb5317192fdbc96b953502b5c",
-    "src/game.js": "a1697ca031a5f7c68cea66dd574943c1eb4647b7b5a859620f421b4982c23703",
+    "src/game.js": "93b97a6073dbe4b27cb7008a362bf59dd41c98a63b4c670892cbd367e755c6b4",
     "src/systems/account-deletion.js": "1fd60e17ceeb505e9cc119078a3d93150e9ef20d2248d5b4b7be9acc2f71b21b",
     "src/systems/developer-service.js": "f6b1d67619cb2ed8ec378fcdfb360f7c6eae2991f24c5fec438731cc501f95d3",
     "src/systems/progression.js": "6b65310d32e8325d4c45cc85e9b8851e600e48ca199af5063f1197eee1401811",

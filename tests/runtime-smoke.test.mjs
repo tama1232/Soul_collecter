@@ -28,7 +28,7 @@ function environment() {
   globalThis.matchMedia = () => ({ matches: false, addEventListener() {} });
   globalThis.requestAnimationFrame = () => 1; globalThis.cancelAnimationFrame = () => {};
   globalThis.Image = class { width = 160; height = 96; set src(value) { this.url = value; queueMicrotask(() => this.onload?.()); } };
-  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'book-of-forgotten-names-0.7.0' }), headers: new Headers() });
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'soul-collecter-0.7.1' }), headers: new Headers() });
   const originalInterval = globalThis.setInterval;
   globalThis.setInterval = (...args) => { const timer = originalInterval(...args); timer.unref(); return timer; };
   globalThis.CONTRACT_CONFIG = { firebase: { apiKey: '', projectId: '' } };

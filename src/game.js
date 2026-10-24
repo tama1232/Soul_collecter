@@ -35023,21 +35023,21 @@ class TitleScene {
       };
       (_0x1a7b7e("book:prev", 160, _0xb8609f > 0, "◀"), _0x1a7b7e("book:next", 320, _0xb8609f < BOOKS.length - 1, "▶"));
     }
-    (_0x511644.save(), _0x511644.globalAlpha = _0xe8c564, _0x511644.fillStyle = "rgba(0,0,0,0.5)", _0x511644.fillRect(0, 34, 480, 64), _0x511644.restore(), drawText(_0x511644, "잊힌 이름의 서", 241, 40, {
+    (_0x511644.save(), _0x511644.globalAlpha = _0xe8c564, _0x511644.fillStyle = "rgba(0,0,0,0.5)", _0x511644.fillRect(0, 34, 480, 64), _0x511644.restore(), drawText(_0x511644, "Soul collecter", 241, 40, {
       "size": 30,
       "align": "center",
       "color": "#3a1a10",
       "bold": !0,
       "alpha": _0xe8c564,
       "shadow": null
-    }), drawText(_0x511644, "잊힌 이름의 서", 240, 38, {
+    }), drawText(_0x511644, "Soul collecter", 240, 38, {
       "size": 30,
       "align": "center",
       "color": "#ffd070",
       "bold": !0,
       "alpha": _0xe8c564,
       "shadow": "#5a2a10"
-    }), drawText(_0x511644, "BOOK OF FORGOTTEN NAMES", 240, 76, {
+    }), drawText(_0x511644, "SOUL COLLECTER", 240, 76, {
       "size": 8,
       "align": "center",
       "color": "#c0a0ff",
@@ -35063,7 +35063,7 @@ class TitleScene {
       (ua(_0x511644, 150 + _0x4fc210 * 94, 144, 86, 20, _0x3ab2ae.label, this.confirm.sel === _0x4fc210, {
         "col": _0x3ab2ae.col
       }), kt.add("tconf:" + _0x4fc210, 150 + _0x4fc210 * 94, 144, 86, 20));
-    })), Xe(_0x511644, [["W/S · ↑↓", "선택"], ["←→", "북"], ["Enter / " + game.input.label("attack"), "결정"]], 246), drawText(_0x511644, "v0.7.0 · 잊힌 이름의 서 · 현실 결제 없음", 476, 260, {
+    })), Xe(_0x511644, [["W/S · ↑↓", "선택"], ["←→", "북"], ["Enter / " + game.input.label("attack"), "결정"]], 246), drawText(_0x511644, "v0.7.1 · Soul collecter · 현실 결제 없음", 476, 260, {
       "size": 6,
       "align": "right",
       "color": "#6a6078"
@@ -35213,13 +35213,13 @@ class LoginScene {
     }
   }
   ui(_0x147caa) {
-    (drawText(_0x147caa, "잊힌 이름의 서", 240, 22, {
+    (drawText(_0x147caa, "Soul collecter", 240, 22, {
       "size": 26,
       "align": "center",
       "color": "#ffd070",
       "bold": !0,
       "shadow": "#5a2a10"
-    }), drawText(_0x147caa, "BOOK OF FORGOTTEN NAMES", 240, 56, {
+    }), drawText(_0x147caa, "SOUL COLLECTER", 240, 56, {
       "size": 7,
       "align": "center",
       "color": "#c0a0ff"
