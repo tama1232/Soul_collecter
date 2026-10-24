@@ -48,7 +48,7 @@ export function installDeveloperConsole({getGame,developer,characters,weapons}) 
       button('보조 개발자 코드 발급',async()=>{const result=await developer.operation('issueCode');output(result);message('코드는 이 화면에 한 번 표시됩니다. 사용할 사람에게 전달하세요.');});return;
     }
     if(tab==='coupons'){
-      const form=element('form');content().append(form);const code=field(form,'쿠폰 코드','code'),desc=field(form,'설명','desc'),until=field(form,'만료일(선택)','until','','date'),rewards={};for(const [key,label] of [['stones','계약석'],['crystals','영혼 결정'],['compass','나침반'],['awShards','각성 파편']])rewards[key]=field(form,label,key,0,'number');
+      const form=element('form');content().append(form);const code=field(form,'쿠폰 코드','code'),desc=field(form,'설명','desc'),until=field(form,'만료일(선택)','until','','date'),rewards={};for(const [key,label] of [['stones','영혼석'],['crystals','영혼 결정'],['compass','나침반'],['awShards','각성 파편']])rewards[key]=field(form,label,key,0,'number');
       button('쿠폰 발급',async()=>{const reward=Object.fromEntries(Object.entries(rewards).map(([key,input])=>[key,Number(input.value)]));const result=await developer.operation('createCoupon',{code:code.value,desc:desc.value,until:until.value,reward});message('쿠폰을 생성했습니다: '+result.code);},form);return;
     }
     if(tab==='audit'){
@@ -66,7 +66,7 @@ export function installDeveloperConsole({getGame,developer,characters,weapons}) 
       button('현재 방 상태 확인',()=>output({metrics:game.loop.metrics,run:game.scene.run,player:game.scene.room?{x:game.scene.room.player.b.x,y:game.scene.room.player.b.y,hp:game.scene.room.run.hp}:null}));return;
     }
   }
-  async function detail(uid){const data=await developer.operation('playerDetail',{uid});content().replaceChildren();button('계정 목록으로',()=>render('players'));const summary=accountSummary({uid,...data.account});content().append(element('h3',(summary.id??uid)+' · 상세 기록'));output({uid,개발자:data.developer,영웅:summary.heroes,출정:summary.runs,완료스토리:summary.story,통계:summary.save.stats,재화:{계약석:summary.save.stones,영혼결정:summary.save.crystals,나침반:summary.save.compass},강화:summary.save.upgrades,최고기록:{무한:summary.save.endlessBest,보스러쉬:summary.save.rushBest},영웅목록:summary.save.chars,무기목록:summary.save.weapons});
+  async function detail(uid){const data=await developer.operation('playerDetail',{uid});content().replaceChildren();button('계정 목록으로',()=>render('players'));const summary=accountSummary({uid,...data.account});content().append(element('h3',(summary.id??uid)+' · 상세 기록'));output({uid,개발자:data.developer,영웅:summary.heroes,출정:summary.runs,완료스토리:summary.story,통계:summary.save.stats,재화:{영혼석:summary.save.stones,영혼결정:summary.save.crystals,나침반:summary.save.compass},강화:summary.save.upgrades,최고기록:{무한:summary.save.endlessBest,보스러쉬:summary.save.rushBest},영웅목록:summary.save.chars,무기목록:summary.save.weapons});
     const logs=element('details');logs.append(element('summary','저장 변동·외부 개입 의심 기록'));output({audit:data.audit,integrity:data.integrity},logs);content().append(logs);
     if(developer.role.kind==='owner') {const form=element('form');content().append(form);const input=field(form,'초기화하려면 해당 UID를 다시 입력','confirm');const action=button('이 계정 게임 데이터 초기화',async()=>{if(input.value!==uid)throw new Error('대상 UID가 일치하지 않습니다');await developer.operation('resetPlayer',{uid,reason:'개발자 콘솔 초기화'});message('초기화가 반영되었습니다. 접속 중인 계정은 최신 기록을 다시 불러와야 합니다.');},form);action.className='danger';}
   }

@@ -10,15 +10,7 @@ import {RELIC_MAX_LEVEL,rollRelicChoices,stackedRelicEffects} from '../src/confi
 import {CHARACTERS,createSave,data_Rr,data_s0,data_Ue,data_Lr,WEAPONS} from '../src/game-data.js';
 import {selectedWeapon} from '../src/features/weapon-pickup.js';
 import {settleWeekly} from '../functions/weekly.js';
-function memoryDb(){
- const records=new Map();let nextId=0,queue=Promise.resolve();
- const snapshot=path=>({id:path.split('/').at(-1),exists:records.has(path),data:()=>structuredClone(records.get(path))});
- const db={records,doc:path=>({path,get:async()=>snapshot(path),create:async data=>{if(records.has(path))throw new Error('exists');records.set(path,structuredClone(data));},set:async data=>records.set(path,structuredClone(data))}),collection:path=>{
-  const config={filters:[],order:'__name__',direction:'asc',max:Infinity,cursor:null};
-  const query={where(field,op,value){config.filters.push([field,op,value]);return query;},orderBy(field,direction='asc'){config.order=field;config.direction=direction;return query;},limit(n){config.max=n;return query;},startAfter(cursor){config.cursor=cursor;return query;},async add(data){const id=String(++nextId).padStart(6,'0');records.set(path+'/'+id,structuredClone(data));return {id};},async get(){let entries=[...records].filter(([key])=>key.startsWith(path+'/')&&key.slice(path.length+1).split('/').length===1);for(const [field,op,value] of config.filters)entries=entries.filter(([,data])=>op==='=='?data[field]===value:data[field]>value);entries.sort((a,b)=>{const av=config.order==='__name__'?a[0].split('/').at(-1):a[1][config.order],bv=config.order==='__name__'?b[0].split('/').at(-1):b[1][config.order];return (av<bv?-1:av>bv?1:0)*(config.direction==='asc'?1:-1);});if(config.cursor)entries=entries.filter(([key])=>key.split('/').at(-1)>config.cursor);return {docs:entries.slice(0,config.max).map(([key])=>snapshot(key))};}};return query;
- },runTransaction:fn=>{const task=queue.then(async()=>{const writes=[];const result=await fn({get:async ref=>snapshot(ref.path),set:(ref,value,options)=>writes.push(()=>records.set(ref.path,options?.merge?{...records.get(ref.path),...structuredClone(value)}:structuredClone(value))),create:(ref,value)=>writes.push(()=>{assert.equal(records.has(ref.path),false);records.set(ref.path,structuredClone(value));}),update:(ref,value)=>writes.push(()=>records.set(ref.path,{...records.get(ref.path),...structuredClone(value)})),delete:ref=>writes.push(()=>records.delete(ref.path))});for(const write of writes)write();return result;});queue=task.catch(()=>{});return task;}};
- return db;
-}
+import {memoryDb} from './helpers/memory-db.mjs';
 // Ephemeral fixtures exist only in this process and its in-memory fake database.
 const fixtureCode=()=> 'SC-DEV-'+randomBytes(16).toString('hex').toUpperCase();
 const ROOT=fixtureCode();
@@ -84,10 +76,15 @@ test('selected seven-star weapon receives exactly half of the seven-star pool wi
  assert.equal(normalRates(false).find(([rarity])=>rarity===7)[1],.0003);
 });
 
-test('fallen divine fragment is overwhelmingly stronger than its seven-star prototype',()=>{
+test('Nemea has 1.5x prototype stats, requested cooldowns and bounded combat effects',()=>{
  const hero=CHARACTERS.anima,base=CHARACTERS.caelus;
- assert.equal(hero.name,'타락한 신의 파편');assert.equal(hero.rarity,8);assert.ok(hero.atk>=base.atk*8);assert.ok(hero.hp>=base.hp*10);
- assert.ok(hero.passive.effects[0].stats.dmgTaken<=-.6);assert.ok(hero.ult.act.ev.some(event=>event.k==='heal'&&event.v===1));assert.ok(hero.ult.act.ev.some(event=>event.k==='shield'&&event.v===1));
+ assert.equal(hero.name,'네메아');assert.equal(hero.title,'타락한 신의 파편');assert.equal(hero.rarity,8);
+ assert.equal(hero.atk,base.atk*1.5);assert.equal(hero.hp,base.hp*1.5);
+ assert.deepEqual(hero.skills.map(skill=>skill.cd),[8,10]);assert.equal(hero.ult.cd,45);
+ assert.equal(hero.skills[0].act.ev.filter(event=>event.m).reduce((n,event)=>n+event.m,0),base.skills[0].act.ev.filter(event=>event.m).reduce((n,event)=>n+event.m,0));
+ assert.equal(hero.passive.effects[0].stats.dmgTaken,-.1);
+ assert.ok(hero.ult.act.ev.some(event=>event.k==='heal'&&event.v===.2));
+ assert.equal(WEAPONS.nemea_requiem.owner,'anima');assert.equal(WEAPONS.nemea_requiem.rarity,8);
 });
 
 test('client developer tools bind to authenticated UID and report settings/file mismatches',async()=>{

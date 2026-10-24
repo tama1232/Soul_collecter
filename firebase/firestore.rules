@@ -17,6 +17,8 @@ service cloud.firestore {
     match /developerAudit/{event} { allow read: if developer(); allow write: if false; }
     match /integrityReports/{event} { allow read: if developer(); allow write: if false; }
     match /runtimeConfig/{config} { allow read: if signedIn(); allow write: if false; }
+    match /rankTitles/{snapshot} { allow read: if signedIn(); allow write: if false; }
+    match /rankTitleSeasons/{week} { allow read,write: if false; }
     match /weeklyAwards/{uid}/items/{award} { allow read: if owner(uid) && !everDeveloper(uid); allow write: if false; }
     match /saves/{uid} {
       allow get: if owner(uid) || developer();

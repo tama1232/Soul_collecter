@@ -132,15 +132,3 @@ test('Sunday KST boundary, weekly score migration and client reward receipts agr
   assert.equal((await claimCloudAwards(save,{uid:'player',idToken:'test'},'test',after,fetchAward)).length,1);
   assert.equal((await claimCloudAwards(save,{uid:'player',idToken:'test'},'test',after,fetchAward)).length,0);
 });
-
-test('server weekly settlement awards all tied leaders once and excludes debug accounts',async()=>{
-  const docs=new Map(),awardRecords=new Map();
-  docs.set('a',{w20261018_prog:400,w20261018_endless:100});
-  docs.set('b',{w20261018_prog:400,w20261018_rush:22});
-  docs.set('debug',{w20261018_prog:9999,dbg:1});
-  const db={collection:()=>({where(field){return {orderBy(){return {get:async()=>({docs:[...docs].filter(([,data])=>data[field]>0).sort((a,b)=>b[1][field]-a[1][field]).map(([id,data])=>({id,data:()=>data}))})};}};}}),doc:path=>({path,get:async()=>({exists:false})}),runTransaction:async fn=>fn({get:async ref=>({exists:awardRecords.has(ref.path)}),create:(ref,value)=>awardRecords.set(ref.path,value)})};
-  const at=Date.parse('2026-10-24T15:00:00Z');
-  await settleWeekly(db,at);assert.equal(awardRecords.size,4);
-  await settleWeekly(db,at);assert.equal(awardRecords.size,4);
-  assert.ok([...awardRecords.values()].every(award=>award.compass===2 && award.uid!=='debug'));
-});

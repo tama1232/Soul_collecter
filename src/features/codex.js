@@ -1,6 +1,7 @@
+import {eightContentVisible} from '../config/expansion.js';
 import {bondMultiplier, collectionBonds} from '../config/expansion.js';
 // Reconstructed from the public 2026-10-23 distribution; see docs/PROVENANCE.md.
-import {CHARACTER_LIST, data_ve, data_Ue, data_Cr, data_ye, data_Se, data_O0, data_Re, data_P0, getEnemyKillCount, data_hr, data_Js, DEVELOPER_FLAGS, data_Nr, data_Gr, AWAKENING_MAX, data_yr, data_a0, CHARACTERS, data_s0, data_L, getBossKillCount, data_H0, data_E0, data_lo} from "../game-data.js";
+import {CHARACTER_LIST as ALL_CHARACTERS, data_ve as ALL_WEAPONS, data_Ue, data_Cr, data_ye, data_Se, data_O0, data_Re, data_P0, getEnemyKillCount, data_hr, data_Js, DEVELOPER_FLAGS, data_Nr, data_Gr, AWAKENING_MAX, data_yr, data_a0, CHARACTERS, data_s0, data_L, getBossKillCount, data_H0, data_E0, data_lo} from "../game-data.js";
 import {ParticleEffects, game, runtime_w, runtime_kt, drawText, runtime_ua, runtime_ye, runtime_Xe, runtime_q, runtime_Rn, runtime_Qf, runtime_ue, runtime_zn, runtime_Dn, runtime_Hs, drawItemIcon, runtime_de, runtime_zs, runtime_Zf, runtime_Ro, runtime_qh, runtime__t, runtime_En, runtime_Sh, runtime_Ph, runtime_Ga, runtime__0, runtime_Ka} from "../game.js";
 const G = ["영웅", "무기", "유물", "문장", "세트", "인연", "적", "보스"], D = 6, es = 7, Ts = {
   "boss": "보스",
@@ -44,6 +45,8 @@ const q = 19, fs = 14, X = 6, hs = {
   5: [1, 19]
 };
 class Ps {
+  get characters(){return ALL_CHARACTERS.filter(item=>eightContentVisible(game.save,item));}
+  get weapons(){return ALL_WEAPONS.filter(item=>eightContentVisible(game.save,item));}
   constructor(_0x5015fa) {
     this.back = _0x5015fa;
   }
@@ -60,7 +63,7 @@ class Ps {
   patPage = 0;
   patT = 0;
   count() {
-    return [CHARACTER_LIST.length, data_ve.length, data_Ue.length, data_Cr.length, data_ye.length, data_Se.length, data_O0.length, data_Re.length][this.tab];
+    return [this.characters.length, this.weapons.length, data_Ue.length, data_Cr.length, data_ye.length, data_Se.length, data_O0.length, data_Re.length][this.tab];
   }
   enter() {
     const _0x3f5f0e = data_P0(game.save);
@@ -112,7 +115,7 @@ class Ps {
       "f": 0,
       "which": 0
     }, this.patPage = 0, this.patT = 0), this.tab === es && ++this.patT >= 240 && (this.patT = 0, this.patPage++), this.tab === 0)) {
-      const _0x15ff25 = CHARACTER_LIST[this.sel];
+      const _0x15ff25 = this.characters[this.sel];
       _0x15ff25 && game.save.newChars.includes(_0x15ff25.id) && (game.save.newChars = game.save.newChars.filter(_0x56c758 => _0x56c758 !== _0x15ff25.id), game.persist());
       const _0x34feb4 = this.seq(), _0x37387d = _0x34feb4[this.preview.act % _0x34feb4.length];
       this.preview.f++;
@@ -122,7 +125,7 @@ class Ps {
     this.fx.update();
   }
   seq() {
-    const _0x1880f9 = CHARACTER_LIST[this.sel];
+    const _0x1880f9 = this.characters[this.sel];
     return [..._0x1880f9.combo, _0x1880f9.skills[0].act, _0x1880f9.skills[1].act, _0x1880f9.swap.act];
   }
   pose() {
@@ -189,7 +192,7 @@ class Ps {
   }
   charGrid(_0x1885ec) {
     const _0x5cd75b = game.save;
-    (this.gridArrows(_0x1885ec, CHARACTER_LIST.length), CHARACTER_LIST.forEach((_0x5fbe94, _0x56b093) => {
+    (this.gridArrows(_0x1885ec, this.characters.length), this.characters.forEach((_0x5fbe94, _0x56b093) => {
       if (!this.gridVisible(_0x56b093)) return;
       const [_0x173e57, _0x34a108] = this.gridCell(_0x56b093), _0x1aa528 = _0x5cd75b.chars[_0x5fbe94.id] ?? (DEVELOPER_FLAGS.all ? {
         "aw": 0
@@ -207,7 +210,7 @@ class Ps {
         "bold": !0
       }), runtime_kt.add("cx:" + _0x56b093, _0x173e57, _0x34a108, 32, 32));
     }));
-    const _0x5259c4 = CHARACTER_LIST[this.sel], _0x372956 = _0x5cd75b.chars[_0x5259c4.id] ?? (DEVELOPER_FLAGS.all ? {
+    const _0x5259c4 = this.characters[this.sel], _0x372956 = _0x5cd75b.chars[_0x5259c4.id] ?? (DEVELOPER_FLAGS.all ? {
       "lv": 1,
       "aw": 0
     } : void 0);
@@ -271,7 +274,7 @@ class Ps {
   }
   weaponGrid(_0x5e32ef) {
     const _0x1602c6 = game.save;
-    (this.gridArrows(_0x5e32ef, data_ve.length), data_ve.forEach((_0xd556d2, _0x49abd2) => {
+    (this.gridArrows(_0x5e32ef, this.weapons.length), this.weapons.forEach((_0xd556d2, _0x49abd2) => {
       if (!this.gridVisible(_0x49abd2)) return;
       const [_0x3466f0, _0x4fbbfa] = this.gridCell(_0x49abd2), _0x43099a = _0x1602c6.weapons[_0xd556d2.id] ?? (DEVELOPER_FLAGS.all ? {
         "rf": 1
@@ -283,7 +286,7 @@ class Ps {
         "bold": !0
       }), runtime_kt.add("cx:" + _0x49abd2, _0x3466f0, _0x4fbbfa, 32, 32));
     }));
-    const _0x47a2bc = data_ve[this.sel], _0x3a7b14 = _0x1602c6.weapons[_0x47a2bc.id] ?? (DEVELOPER_FLAGS.all ? {
+    const _0x47a2bc = this.weapons[this.sel], _0x3a7b14 = _0x1602c6.weapons[_0x47a2bc.id] ?? (DEVELOPER_FLAGS.all ? {
       "rf": 1
     } : void 0);
     (runtime_ye(_0x5e32ef, 200, 28, 274, 226, {
@@ -390,7 +393,7 @@ class Ps {
         "color": "#f0e8d8"
       }, 10));
     }));
-    const _0x1e9476 = CHARACTER_LIST.filter(_0x3bed9e => _0x3bed9e.crest === _0x46196d.id).map(_0x17d720 => _0x17d720.name), _0x3eaa49 = data_ve.filter(_0x1012de => _0x1012de.crest?.includes(_0x46196d.id)).map(_0x52b319 => _0x52b319.name.replace(/「.*」/, "").trim());
+    const _0x1e9476 = this.characters.filter(_0x3bed9e => _0x3bed9e.crest === _0x46196d.id).map(_0x17d720 => _0x17d720.name), _0x3eaa49 = this.weapons.filter(_0x1012de => _0x1012de.crest?.includes(_0x46196d.id)).map(_0x52b319 => _0x52b319.name.replace(/「.*」/, "").trim());
     (runtime_Hs(_0x3f1717, "영웅: " + (_0x1e9476.join(", ") || "-"), 212, 204, 254, {
       "size": 5,
       "color": "#c8c0d8"

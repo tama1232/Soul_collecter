@@ -75,7 +75,7 @@ class _ {
       (runtime_w.play("error"), game.toast("영혼 결정이 부족하다", "#ff8080"));
       return;
     }
-    (runtime_w.play("buy"), game.toast("계약석 +" + data_Be.gain * _0x5a9695, "#c0a0ff"), game.persist());
+    (runtime_w.play("buy"), game.toast("영혼석 +" + data_Be.gain * _0x5a9695, "#c0a0ff"), game.persist());
   }
   world(_0x23d49e) {
     (_0x23d49e.fillStyle = "#100a14", _0x23d49e.fillRect(0, 0, 480, 270));
@@ -143,16 +143,16 @@ class _ {
       "align": "center",
       "color": "#c0a0ff",
       "bold": !0
-    }), drawText(_0x3e4c6b, "남는 영혼 결정을 계약에 쓰는 계약석으로 바꾼다 (결정 " + data_Be.cost + " → 계약석 " + data_Be.gain + ")", 240, 58, {
+    }), drawText(_0x3e4c6b, "남는 영혼 결정을 계약에 쓰는 영혼석으로 바꾼다 (결정 " + data_Be.cost + " → 영혼석 " + data_Be.gain + ")", 240, 58, {
       "size": 7,
       "align": "center",
       "color": "#a8a0c0"
-    }), runtime_de(_0x3e4c6b, "gem", 196, 74, 10, "#6a9aff"), drawText(_0x3e4c6b, "보유 계약석 " + _0x59b0c0.stones, 210, 75, {
+    }), runtime_de(_0x3e4c6b, "gem", 196, 74, 10, "#6a9aff"), drawText(_0x3e4c6b, "보유 영혼석 " + _0x59b0c0.stones, 210, 75, {
       "size": 8,
       "color": "#e0d0ff"
     }), $.forEach((_0x30a641, _0x1d1ca2) => {
       const _0x5b6838 = 52 + _0x1d1ca2 * 196, _0x410ef8 = data_Be.cost * _0x30a641;
-      (runtime_ua(_0x3e4c6b, _0x5b6838, 100, 180, 60, "계약석 " + data_Be.gain * _0x30a641, _0x1d1ca2 === this.xsel, {
+      (runtime_ua(_0x3e4c6b, _0x5b6838, 100, 180, 60, "영혼석 " + data_Be.gain * _0x30a641, _0x1d1ca2 === this.xsel, {
         "sub": "영혼 결정 " + _0x410ef8,
         "disabled": _0x59b0c0.crystals < _0x410ef8,
         "col": "#c0a0ff",

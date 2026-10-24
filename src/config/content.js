@@ -1,19 +1,24 @@
 export const GAME_TITLE = '사자의 서: 별의 기록';
 export const BOOK_ARCS = [
-  { name: '잿빛의 서', goal: '사라진 이름을 찾아 계약의 첫 장을 완성한다.', discovery: '영혼이 아닌 이름이 지워지고 있었다.', resolution: '첫 기록을 되찾자, 바다 너머에서 같은 별빛이 응답했다.' },
-  { name: '조수의 서', goal: '기억을 실은 바다를 건너 별의 항로를 복원한다.', discovery: '기억을 삼키는 파도는 누군가의 명령을 따랐다.', resolution: '잠긴 항로를 열자, 지워진 기록의 흔적이 성으로 이어졌다.' },
-  { name: '잉크의 서', goal: '닫힌 성의 기록을 읽고 망각의 근원을 추적한다.', discovery: '왕은 이름을 지워 백성을 지키려 했지만, 그 대가는 기억이었다.', resolution: '봉인을 푼 기록서는 마지막 백지에 자신의 선택을 남기라 했다.' },
-  { name: '새벽의 서', goal: '백지의 경계를 넘어 되찾은 이름들의 운명을 결정한다.', discovery: '기록서를 완성할 힘은 지배가 아닌 기억을 나누는 계약이었다.', resolution: '별의 기록은 끝나지 않는다. 되찾은 이름마다 새로운 아침이 열린다.' },
+  { name: '무너진 왕국', goal: '사라진 이름을 찾아 계약의 첫 장을 완성한다.', discovery: '영혼이 아닌 이름이 지워지고 있었다.', resolution: '첫 기록을 되찾자, 바다 너머에서 같은 별빛이 응답했다.' },
+  { name: '저주받은 바다', goal: '기억을 실은 바다를 건너 별의 항로를 복원한다.', discovery: '기억을 삼키는 파도는 누군가의 명령을 따랐다.', resolution: '잠긴 항로를 열자, 지워진 기록의 흔적이 성으로 이어졌다.' },
+  { name: '잠든 성의 비밀', goal: '닫힌 성의 기록을 읽고 망각의 근원을 추적한다.', discovery: '왕은 이름을 지워 백성을 지키려 했지만, 그 대가는 기억이었다.', resolution: '봉인을 푼 기록서는 마지막 백지에 자신의 선택을 남기라 했다.' },
+  { name: '마지막 새벽', goal: '백지의 경계를 넘어 되찾은 이름들의 운명을 결정한다.', discovery: '기록서를 완성할 힘은 지배가 아닌 기억을 나누는 계약이었다.', resolution: '별의 기록은 끝나지 않는다. 되찾은 이름마다 새로운 아침이 열린다.' },
 ];
 export function applyStoryContent(books, stories) {
-  const steps = ['첫 흔적', '끊어진 약속', '남겨진 증언', '봉인의 이면', '진실의 대가', '마지막 선택', '다시 쓰는 이름'];
+  const chapters = [
+    ['깨어난 무덤','성문을 넘어','재가 내리는 거리','지하 감옥','검은 종탑','왕의 근위대','끝없는 왕'],
+    ['안개 속 항구','유령선의 초대','폭풍을 뚫고','가라앉은 신전','심해의 괴물','선장의 비밀','바다의 주인'],
+    ['잠긴 성문','움직이는 복도','침묵의 서고','거울 뒤의 방','성 아래의 괴물','왕좌의 그림자','성을 깨워라'],
+    ['하얀 벌판','별이 사라진 밤','무너지는 경계','돌아오지 않는 길','마지막 수호자','끝을 향하여','다시 뜨는 해'],
+  ];
   for (let index = 0; index < books.length; index++) {
     const book = books[index], arc = BOOK_ARCS[index]; if (!arc) continue;
     book.name = arc.name;
     book.title = arc.goal;
     for (let chapter = 0; chapter < book.stories.length; chapter++) {
       const story = stories.find(entry => entry.id === book.stories[chapter]); if (!story) continue;
-      story.name = steps[chapter] ?? `이어지는 기록 ${chapter + 1}`;
+      story.name = chapters[index]?.[chapter] ?? `이어지는 기록 ${chapter + 1}`;
       story.sub = `${arc.name} · ${chapter + 1}장`;
       // Replace the previous several-hundred-fold jumps with a continuous campaign curve.
       story.power = { hp: +(1.105 ** (story.id - 1)).toFixed(3), atk: +(1.065 ** (story.id - 1)).toFixed(3) };

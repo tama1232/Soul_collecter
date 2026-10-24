@@ -10,5 +10,6 @@ await cp(resolve(root, 'public'), resolve(root, 'dist'), { recursive: true });
 await cp(resolve(root, 'src'), resolve(root, 'dist/src'), { recursive: true });
 await writeFile(resolve(root, 'dist/version.json'), JSON.stringify({ id: GAME_VERSION }));
 await writeFile(resolve(root,'functions/default-save.json'),JSON.stringify(createSave())+'\n');
+await cp(resolve(root,'src/config/ranking-rules.js'),resolve(root,'functions/ranking-rules.js'));
 await buildIntegrity(root);
 console.log('Built dist/ — static deployment, no runtime dependencies.');

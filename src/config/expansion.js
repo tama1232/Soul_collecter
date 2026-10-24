@@ -78,18 +78,32 @@ export function collectionBonds(definitions, characters, owned) {
     return {...bond, id:'collection:'+bond.id, name:'수집 · '+bond.name, desc:'상시 공격/체력/스킬 +' + (multiplier*.5).toFixed(2) + '%', effects:[{stats:{atk:multiplier*.005,hpPct:multiplier*.005,skillDmg:multiplier*.005}}]};
   });
 }
-export function makeEightHero(base, ranged) {
-  const hero = structuredClone(base);
-  Object.assign(hero, {id:EIGHT_HERO_ID,name:'타락한 신의 파편',title:'신성을 잃은 최초의 영혼',rarity:8,allElements:true,crests:ALL_CRESTS,
-    lore:'신은 타락한 순간 수많은 영혼으로 부서졌다. 다섯 봉인 너머에서 돌아온 하나의 파편은 모든 속성과 죽음의 기억을 품는다. 신의 잔해만으로도 왕들의 역사는 무너진다.',atk:base.atk*8,hp:base.hp*10,fx:'#fff1b8'});
-  Object.assign(hero.look,{body:'#241d34',trim:'#ffdd8a',hair:'#fff1c4',eye:'#ffe080',wcol:'#fff1b8',wcol2:'#aa6cff',cape:'#181522',glow:'#ffdc90'});
-  hero.combo = [structuredClone(base.combo[0]), structuredClone(ranged.combo[0]), structuredClone(base.combo.at(-1))];
-  const empower = act => { for (const event of act.ev ?? []) if (typeof event.m === 'number') event.m *= 5; return act; };
-  hero.combo.forEach(empower); empower(hero.air); empower(hero.dashAtk);
-  hero.skills.forEach((skill,index) => {skill.name = ['신벌 · 무너진 왕좌','타락 · 만상의 종말'][index]; skill.desc='압도적인 신성으로 전장을 쓸어버린다. 공격력 배율은 원형 스킬의 5배.'; skill.cd=Math.max(2,skill.cd*.55); empower(skill.act);});
-  if (hero.ult) { hero.ult.name='신의 잔해 · 세계의 끝'; hero.ult.desc='타락한 신의 힘을 해방한다. 거대한 연속 신벌, 완전한 회복과 신성 보호막.';hero.ult.cd*=.6;empower(hero.ult.act);hero.ult.act.ev.push({t:0,k:'heal',v:1},{t:1,k:'shield',v:1}); }
-  hero.passive = {name:'만상의 영혼',desc:'모든 문장 취급 · 공격 시 화상·출혈·감전·독·냉기를 순환 적용',effects:[{stats:{allDmg:1,skillDmg:2,bossDmg:1,lifesteal:.15,dmgTaken:-.6}},{on:'roomStart',do:[{k:'shield',v:.5}]}]};
-  return hero;
+export const EIGHT_WEAPON_ID='nemea_requiem';
+export function eightContentVisible(save,item) {return item?.rarity!==8 || save.eightUnlocked===true;}
+export function hiddenAchievement(save,id) {return !save.eightUnlocked&&['soul_gate','soul_collecter','soul_awaken'].includes(id.replace(/^title_/,''));}
+export function makeEightHero(base,ranged) {
+ const hero=structuredClone(base);
+ Object.assign(hero,{id:EIGHT_HERO_ID,name:'네메아',title:'타락한 신의 파편',rarity:8,allElements:true,crests:ALL_CRESTS,
+   lore:'오래전 타락한 뒤 사라진 존재. 그 이름조차 잊힌 자리에서, 부서진 영혼 하나가 미약한 기척을 남긴다. 네메아는 자신이 누구였는지 기억하지 못한다.',atk:base.atk*1.5,hp:base.hp*1.5,fx:'#fff1b8'});
+ Object.assign(hero.look,{body:'#241d34',trim:'#ffdd8a',hair:'#fff1c4',eye:'#ffe080',wcol:'#fff1b8',wcol2:'#aa6cff',cape:'#181522',glow:'#ffdc90'});
+ hero.combo=[structuredClone(base.combo[0]),structuredClone(ranged.combo[0]),structuredClone(base.combo.at(-1))];
+ // Base attack is already 1.5x: use normal 7-star action multipliers, without another 5x multiplier.
+ hero.skills.forEach((skill,index)=>{
+   skill.name=['잔흔 베기','무너진 성역'][index];skill.cd=[8,10][index];
+   skill.desc=['남아 있는 힘을 칼날에 모아 베어낸다.','사라진 성역의 흔적을 펼쳐 주위의 적을 공격한다.'][index];
+ });
+ if(hero.ult) {
+   hero.ult.name='사라진 신의 메아리';hero.ult.cd=45;
+   hero.ult.desc='흩어진 잔재를 모아 연속 공격한다. 최대 체력 20% 회복, 25% 보호막.';
+   hero.ult.act.ev.push({t:0,k:'heal',v:.2},{t:1,k:'shield',v:.25});
+ }
+ hero.passive={name:'희미한 기척',desc:'모든 문장 취급 · 모든 피해 +10%, 받는 피해 -10% · 공격 시 다섯 상태이상 순환',effects:[{stats:{allDmg:.10,dmgTaken:-.10}}]};
+ return hero;
+}
+export function makeEightWeapon() {
+ return {id:EIGHT_WEAPON_ID,name:'잔영검 「레퀴엠」',rarity:8,owner:EIGHT_HERO_ID,crest:['soul','shadow'],atk:33,icon:'sword',col:'#e1c5ff',scale:.1,ref:{e:0,dm:true},
+   desc:'스킬 피해 +20%, 받는 피해 -8%',effects:[{stats:{skillDmg:.2,dmgTaken:-.08}}],
+   sig:[{stats:{atk:.1}}],sigMods:[{target:'skill1',dmg:.2},{target:'skill2',dmg:.2}],sigDesc:'네메아: 공격 +10% · 잔흔 베기/무너진 성역 피해 +20%'};
 }
 export function makeHiddenBoss(base) {
   return {...structuredClone(base),id:HIDDEN_BOSS_ID,name:'영혼의 집정관',title:'다섯 봉인의 파수꾼',orb:true,flying:true,split:false,

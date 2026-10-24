@@ -1,7 +1,8 @@
 /** Weekly competition closes Sunday 00:00 Asia/Seoul. */
 export const WEEK_MS = 7*86400000;
 const KST=9*3600000;
-export const WEEKLY_CATEGORIES = ['prog','endless','rush'];
+export {WEEKLY_CATEGORIES} from '../config/ranking-rules.js';
+import {WEEKLY_CATEGORIES} from '../config/ranking-rules.js';
 export function weekStart(at=Date.now()) {
   const local=at+KST,day=Math.floor(local/86400000);
   return (day-new Date(day*86400000).getUTCDay())*86400000-KST;

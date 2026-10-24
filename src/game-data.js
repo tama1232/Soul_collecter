@@ -1,5 +1,7 @@
+import {WEEKLY_CATEGORIES,updateRecord,makeRankTitles} from './config/ranking-rules.js';
+import {canSelectTitle} from './systems/rank-titles.js';
 import {getProbabilities} from './config/live-rules.js';
-import {EIGHT_HERO_ID, HIDDEN_BOSS_ID, ALL_CRESTS, rushCycle, cycleMultiplier, rollRelicChoices, capRelics, classifyRelics, makeEightHero, makeHiddenBoss, EXTRA_MILESTONES} from './config/expansion.js';
+import {EIGHT_HERO_ID, HIDDEN_BOSS_ID, ALL_CRESTS, rushCycle, cycleMultiplier, rollRelicChoices, capRelics, classifyRelics, makeEightHero, makeEightWeapon, makeHiddenBoss, EXTRA_MILESTONES} from './config/expansion.js';
 import {weekStart, weekKey} from './systems/weekly.js';
 import {ECONOMY,ECONOMY_VERSION} from './config/economy.js';
 import {rollRarity} from './config/economy.js';
@@ -22604,7 +22606,7 @@ const upgrade_revive = {
 const upgrade_stone = {
   id: "stone",
   name: "영혼 수집가",
-  desc: "계약석 획득 +{v}%",
+  desc: "영혼석 획득 +{v}%",
   max: 5,
   cost: [1800, 3600, 6000, 9000, 12600],
   per: 10,
@@ -24251,7 +24253,7 @@ const _0x52fd24 = {
 };
 const _0x451e3c = {
   label: "손을 담근다",
-  result: "계약석이 손에 맺혔다.",
+  result: "영혼석이 손에 맺혔다.",
   fx: _0x52fd24
 };
 const _0x581f98 = {
@@ -24417,7 +24419,7 @@ const _0x3d1297 = {
 };
 const _0x140cb3 = {
   label: "절을 올린다",
-  result: "작은 계약석 조각이 떨어졌다.",
+  result: "작은 영혼석 조각이 떨어졌다.",
   fx: _0x3d1297
 };
 const definition_shrine = {
@@ -30554,7 +30556,7 @@ const _0x324661 = {
   finalStage: 5,
   trueStage: 6,
   power: _0x3e6da3,
-  intro: ["한때 빛나던 왕국 아스펠은 하룻밤 사이에 무너졌다.", "왕은 죽음을 거부했고, 스스로 「끝없는 왕」이 되어", "왕국의 모든 혼을 지하 묘소에 가두었다.", "", "그대는 계약자.", "계약석으로 쓰러진 영웅들의 혼을 불러내 계약하고,", "그들의 몸을 빌려 싸울 수 있는 유일한 자.", "", "계약의 성소에서 영웅을 부르고, 묘소의 가장 깊은 곳으로 내려가라.", "끝없는 왕에게 끝을 선사하라."],
+  intro: ["한때 빛나던 왕국 아스펠은 하룻밤 사이에 무너졌다.", "왕은 죽음을 거부했고, 스스로 「끝없는 왕」이 되어", "왕국의 모든 혼을 지하 묘소에 가두었다.", "", "그대는 계약자.", "영혼석으로 쓰러진 영웅들의 혼을 불러내 계약하고,", "그들의 몸을 빌려 싸울 수 있는 유일한 자.", "", "계약의 성소에서 영웅을 부르고, 묘소의 가장 깊은 곳으로 내려가라.", "끝없는 왕에게 끝을 선사하라."],
   ending: ["끝없는 왕의 왕관이 바닥에 떨어져 굴렀다.", "갇혀 있던 혼들이 하나둘 묘소를 빠져나가 밤하늘로 올라갔다.", "", "그런데 — 하늘로 오른 혼들의 빛이, 어느 순간 꺼지기 시작했다.", "별자리 하나가 잿빛으로 물들며 그 빛을 삼키고 있었다.", "", "계약은 아직 끝나지 않았다."],
   cards: ["계약자여, 끝없는 왕을 쓰러뜨려라", "더 깊은 곳으로", "더 깊은 곳으로", "더 깊은 곳으로", "왕좌가 가깝다", "왕이 삼킨 혼들이 잠든 곳 — 진실의 끝으로"]
 };
@@ -31510,11 +31512,11 @@ const f0 = _0x19befa => ze(xe(_0x19befa) - 1), m0 = _0x3c5a66 => xe(_0x3c5a66) +
   "key": "rush" + _0x15e5f8.id,
   "asc": !1,
   "label": "보스러쉬 " + _0x15e5f8.name
-})), {key:"endless",asc:false,label:"무한 주간 종합"}, {key:"rush",asc:false,label:"보스러쉬 주간 종합"}, _0x263a00, ...E.map(_0x2531f4 => ({
+})), {key:"endless",asc:false,label:"무한 주간 종합"}, {key:"rush",asc:false,label:"보스러쉬 주간 종합"}, {key:"crystals",asc:false,label:"영혼 결정 (최고 보유)"}, _0x263a00, ...E.map(_0x2531f4 => ({
   "key": "time" + _0x2531f4.id,
   "asc": !0,
   "label": qa(_0x2531f4.id) + " 시간"
-}))], Qa = _0x5bc275 => _0x5bc275.startsWith("time"), Ja = ["prog", "endless", "rush"];
+}))], Qa = _0x5bc275 => _0x5bc275.startsWith("time"), Ja = WEEKLY_CATEGORIES;
 function u0(category) { return Ja.includes(category) ? {stones:0,compass:2} : null; }
 function k0(_0x17fc36, _0x26f8d0) {
   const _0x37677f = {
@@ -31562,6 +31564,7 @@ function b0(_0xf5811) {
   for (const [_0x5e1a79, _0x4c9b34] of Object.entries(_0xf5811.storyTime ?? ({}))) _0x4c9b34 > 0 && (_0x58837c["time" + _0x5e1a79] = Math.round(_0x4c9b34));
   _0x58837c.endless=Math.max(0,...Object.values(_0xf5811.endlessBest??{}));
   _0x58837c.rush=Math.max(0,...Object.values(_0xf5811.rushBest??{}));
+  Object.assign(_0x58837c,_0xf5811.rankRecords??{});
   delete _0x58837c.tower;
   return _0x58837c;
 }
@@ -31583,43 +31586,33 @@ function Ge(_0x29e720, _0x45d188) {
     } : void 0
   });
 }
-function z(_0x9a6c78, _0x267bae, _0x4006eb, _0x5f17e1) {
-  const _0xcef43f = {
-    dyxQj: function (_0x4d6ca9, _0x37e6b0) {
-      return _0x4d6ca9 > _0x37e6b0;
-    }
-  };
-  const _0x3e9b23 = _0xcef43f;
-  Ge(_0x9a6c78, _0x5f17e1);
-  const _0x38b8fe = _0x9a6c78.weekly.scores, _0x3f4ccc = _0x38b8fe[_0x267bae];
-  (_0x3f4ccc === void 0 || (Qa(_0x267bae) ? _0x4006eb < _0x3f4ccc : _0x4006eb > _0x3f4ccc)) && (_0x38b8fe[_0x267bae] = _0x4006eb);
+function z(save,category,value,at,details={}) {
+ Ge(save,at);
+ updateRecord(save.weekly.scores,category,value,{...details,at});
+ save.rankRecords??={};
+ const previous=b0(save)[category];
+ if(save.rankRecords[category]===undefined&&previous!==undefined) updateRecord(save.rankRecords,category,previous);
+ updateRecord(save.rankRecords,category,value,{...details,at});
 }
-function st(save, at) { Ge(save,at); return {...save.weekly.scores}; }
-function g0(_0x38a818, _0x5e16ba, _0x4155c8) {
-  const _0x1131ad = {
-    "bPGxk": function (_0x381e8f, _0x4d37fc) {
-      return _0x381e8f > _0x4d37fc;
-    },
-    "asnQr": function (_0x113ff5, _0x4fc1f6, _0x540267, _0x23cc82, _0x1a221d) {
-      return _0x113ff5(_0x4fc1f6, _0x540267, _0x23cc82, _0x1a221d);
-    },
-    "wLVxh": "curse"
-  };
-  if (_0x5e16ba.tower) (_0x5e16ba.towerFloor ?? 0) > 0 && z(_0x38a818, "tower", _0x5e16ba.towerFloor, _0x4155c8); else {
-    if (_0x5e16ba.endless) _0x5e16ba.floor > 0 && z(_0x38a818, "endless" + _0x5e16ba.book, _0x5e16ba.floor, _0x4155c8); else {
-      if (_0x5e16ba.bossRush) _0x5e16ba.bosses > 0 && z(_0x38a818, "rush" + _0x5e16ba.book, _0x5e16ba.bosses, _0x4155c8); else {
-        if (_0x5e16ba.victory) {
-          (_0x38a818.curseBest = Math.max(_0x38a818.curseBest ?? -1, _0x5e16ba.curse), z(_0x38a818, _0x1131ad.wLVxh, _0x5e16ba.curse, _0x4155c8));
-          const _0x5d5e6c = Math.max(1, Math.round(_0x5e16ba.frames / 60)), _0x31ad73 = _0x38a818.storyTime[_0x5e16ba.story];
-          ((!_0x31ad73 || _0x5d5e6c < _0x31ad73) && (_0x38a818.storyTime[_0x5e16ba.story] = _0x5d5e6c), z(_0x38a818, "time" + _0x5e16ba.story, _0x5d5e6c, _0x4155c8));
-        }
-      }
-    }
-  }
-  if (_0x5e16ba.endless && _0x5e16ba.floor > 0) z(_0x38a818, "endless", _0x5e16ba.floor, _0x4155c8);
-  if (_0x5e16ba.bossRush && _0x5e16ba.bosses > 0) z(_0x38a818, "rush", _0x5e16ba.bosses, _0x4155c8);
-  if (_0x5e16ba.victory && !_0x5e16ba.endless && !_0x5e16ba.bossRush && !_0x5e16ba.tower) z(_0x38a818, "prog", Le(_0x38a818), _0x4155c8);
-  st(_0x38a818, _0x4155c8);
+function st(save,at) {Ge(save,at);z(save,'crystals',Math.max(0,Math.floor(save.crystals??0)),at);return {...save.weekly.scores};}
+function g0(save,run,at) {
+ const details={curse:run.curse??0,time:Math.max(1,Math.round((run.frames??0)/60))};
+ if(run.endless&&run.floor>0) {
+  z(save,'endless'+run.book,run.floor,at,details);z(save,'endless',run.floor,at,details);
+ } else if(run.bossRush&&run.bosses>0) {
+  z(save,'rush'+run.book,run.bosses,at,details);z(save,'rush',run.bosses,at,details);
+ } else if(run.victory&&!run.tower) {
+  save.curseBest=Math.max(save.curseBest??-1,details.curse);
+  z(save,'curse',details.curse,at,details);
+  // Higher curse takes priority over speed for the same story.
+  const category='time'+run.story;
+  save.rankRecords??={};
+  if(save.rankRecords[category]===undefined&&save.storyTime?.[run.story]>0) updateRecord(save.rankRecords,category,save.storyTime[run.story]);
+  z(save,category,details.time,at,details);
+  save.storyTime??={};save.storyTime[run.story]=save.rankRecords[category];
+  z(save,'prog',Le(save),at,details);
+ }
+ st(save,at);
 }
 function at(_0x592b73) {
   const _0x21b464 = {
@@ -31643,7 +31636,7 @@ function at(_0x592b73) {
   }, _0xbfc41b = _0x4a9ca1 => typeof _0x4a9ca1 == "number" && Number.isFinite(_0x4a9ca1), _0x7afb9f = _0x56212c => {
     const _0x5449d0 = {};
     if (_0x56212c && typeof _0x56212c == "object") {
-      for (const [_0x588d7b, _0x486792] of Object.entries(_0x56212c)) (/^[a-z]+\d*$/).test(_0x588d7b) && _0xbfc41b(_0x486792) && (_0x5449d0[_0x588d7b] = Math.round(_0x486792));
+      for (const [_0x588d7b, _0x486792] of Object.entries(_0x56212c)) (/^[a-z]+\d*(?:_(?:curse|time|at))?$/).test(_0x588d7b) && _0xbfc41b(_0x486792) && (_0x5449d0[_0x588d7b] = Math.round(_0x486792));
     }
     return _0x5449d0;
   }, _0x1b25aa = _0xbfc41b(_0x592b73.curseBest) ? Math.max(-1, Math.floor(_0x592b73.curseBest)) : _0xbfc41b(_0x592b73.curseMax) && _0x592b73.curseMax > 0 ? Math.floor(_0x592b73.curseMax) - 1 : -1, _0x1fe9a4 = {};
@@ -31664,6 +31657,7 @@ function at(_0x592b73) {
     for (const [_0x392934, _0x42d45c] of Object.entries(_0x592b73.rankClaims)) _0x42d45c === !0 && (_0x24ac41[_0x392934] = !0);
   }
   const _0x42c7b5 = {
+    rankRecords:_0x7afb9f(_0x592b73.rankRecords),
     curseBest: _0x1b25aa
   };
   return (_0x42c7b5.storyTime = _0x1fe9a4, _0x42c7b5.weekly = _0x338261, _0x42c7b5.rankClaims = _0x24ac41, _0x42c7b5);
@@ -38719,7 +38713,7 @@ function $0(_0x4b1731) {
 }
 function V0(_0x2c5546) {
   const _0x133d66 = Sr[_0x2c5546.title];
-  return _0x133d66 && (te.all || _0x2c5546.titles.includes(_0x133d66.id)) ? _0x133d66 : ce[0];
+  return _0x133d66 && (canSelectTitle(_0x2c5546,_0x133d66) || te.all&&!_0x133d66.rankCategory) ? _0x133d66 : ce[0];
 }
 const jr = new Uint32Array([1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221, 3624381080, 310598401, 607225278, 1426881987, 1925078388, 2162078206, 2614888103, 3248222580, 3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, 2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037, 2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344, 430227734, 506948616, 659060556, 883997877, 958139571, 1322822218, 1537002063, 1747873779, 1955562222, 2024104815, 2227730452, 2361852424, 2428436474, 2756734187, 3204031479, 3329325298]);
 function Dr(_0x13999c) {
@@ -40053,6 +40047,8 @@ function J0(_0x3edd9a) {
 qr.push(...EXTRA_MILESTONES.map(([id,name,desc]) => ({id,name,desc,reward:160})));
 ce.splice(0,ce.length,...ce.filter(title => !title.id.startsWith('tower')));
 ce.push(...EXTRA_MILESTONES.map(([id,name,desc,cond],index) => ({id:'title_'+id,no:100+index,name,col:'#ffe2a0',desc,cond})));
+for(const category of p0) {if(category.key==='endless') category.label='무한 종합';if(category.key==='rush') category.label='보스러쉬 종합';}
+ce.push(...makeRankTitles(p0));
 Object.assign(Sr,Object.fromEntries(ce.map(title=>[title.id,title])));
 Object.assign(I0,Object.fromEntries(ce.map(title=>[title.no,title])));
 const eo = ["잿빛 정수", "핏빛 정수", "잉크 정수", "백지 정수"], so = ["#e0c890", "#ff6070", "#b080ff", "#f0f0ff"];
@@ -40097,6 +40093,7 @@ const _0x26749d = {
   ["6"]: _0x323244
 };
 const ea = _0x26749d;
+const eightWeapon=makeEightWeapon();ve.push(eightWeapon);Ea[eightWeapon.id]=eightWeapon;
 function sa() {
   return ve.filter(_0x250740 => !!ea[_0x250740.rarity] && !_0x250740.owner).sort((_0x1734df, _0x5b72cb) => _0x1734df.rarity - _0x5b72cb.rarity);
 }
@@ -40191,7 +40188,7 @@ function oo(_0x435d29, _0x5be1dd) {
       return _0x4d02e3(_0x2632cf, _0x21d057);
     }
   }, _0x3f2960 = [];
-  (_0x435d29.stones && _0x3f2960.push("계약석 " + _0x435d29.stones.toLocaleString()), _0x435d29.crystals && _0x3f2960.push("영혼 결정 " + _0x435d29.crystals.toLocaleString()), _0x435d29.compass && _0x3f2960.push("별의 나침반 " + _0x435d29.compass + "개"), _0x435d29.awShards && _0x3f2960.push("각성 파편 " + _0x435d29.awShards.toLocaleString()));
+  (_0x435d29.stones && _0x3f2960.push("영혼석 " + _0x435d29.stones.toLocaleString()), _0x435d29.crystals && _0x3f2960.push("영혼 결정 " + _0x435d29.crystals.toLocaleString()), _0x435d29.compass && _0x3f2960.push("별의 나침반 " + _0x435d29.compass + "개"), _0x435d29.awShards && _0x3f2960.push("각성 파편 " + _0x435d29.awShards.toLocaleString()));
   for (const _0x3eb094 of _0x435d29.chars ?? []) _0x3f2960.push("영웅 " + _0x5be1dd(_0x3eb094, !1));
   for (const _0x422a69 of _0x435d29.weapons ?? []) _0x3f2960.push("무기 " + _0x5be1dd(_0x422a69, !0));
   return _0x3f2960.join(" · ") || "없음";

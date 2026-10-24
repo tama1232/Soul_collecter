@@ -1,3 +1,5 @@
+import {rankingRow,sortRanking,compareRecords,ALL_TIME_CATEGORIES} from './config/ranking-rules.js';
+import {fetchRankTitles,setRankTitleSnapshot} from './systems/rank-titles.js';
 import {developerService} from './systems/developer-service.js';
 import {selectedWeapon} from './features/weapon-pickup.js';
 import {GAME_VERSION} from './config/version.js';
@@ -2757,20 +2759,10 @@ class LocalRankingStore {
       throw new oa("net");
     }
   }
-  rows(_0x51187c) {
-    return Object.entries(this.all()).filter(([,row]) => typeof row[_0x51187c] == "number" && row.dbg!==1 && !row.dev).map(([_0x4b25d9, _0x353fff]) => ({
-      "key": _0x4b25d9,
-      "id": String(_0x353fff.id ?? _0x4b25d9),
-      "value": _0x353fff[_0x51187c],
-      "title": typeof _0x353fff.title == "number" ? _0x353fff.title : void 0,
-      ..._0x353fff.dbg === 1 ? {
-        "dbg": !0
-      } : {}
-    }));
+  rows(field) {
+    return Object.entries(this.all()).filter(([,row])=>typeof row[field]==='number'&&row.dbg!==1&&!row.dev&&!row.rankBan).map(([key,row])=>rankingRow(row,field,key));
   }
-  async top(_0x47082a, _0x44c59f, _0x2cfac2) {
-    return this.rows(_0x47082a).sort((_0x41ec7d, _0xa18263) => (_0x44c59f ? _0x41ec7d.value - _0xa18263.value : _0xa18263.value - _0x41ec7d.value) || (_0x41ec7d.key < _0xa18263.key ? -1 : _0x41ec7d.key > _0xa18263.key ? 1 : 0)).slice(0, _0x2cfac2);
-  }
+  async top(field) {return sortRanking(this.rows(field),field);}
   async better(_0x3b690f, _0x354903, _0x3a72a0) {
     return this.rows(_0x3b690f).filter(_0xfb5c2c => _0x354903 ? _0xfb5c2c.value < _0x3a72a0 : _0xfb5c2c.value > _0x3a72a0).length;
   }
@@ -2809,7 +2801,7 @@ const za = () => "https://firestore.googleapis.com/v1/projects/" + BACKEND_CONFI
           },
           "direction": _0x32ed7d ? "ASCENDING" : "DESCENDING"
         }],
-        "limit": _0x46484d
+        "where": {"fieldFilter":{"field":{"fieldPath":_0xd58ef6},"op":"GREATER_THAN_OR_EQUAL","value":{"integerValue":_0xd58ef6.endsWith("curse")?"0":"1"}}}
       }
     };
   },
@@ -2895,29 +2887,18 @@ class CloudRankingStore {
     return Number(_0x59824e?.[0]?.result?.aggregateFields?.n?.integerValue ?? 0);
   }
 }
-function tc(_0x9d1081, _0x104f28) {
-  const _0x1cac60 = [];
-  for (const _0x3a38ef of Array.isArray(_0x9d1081) ? _0x9d1081 : []) {
-    const _0xed6383 = _0x3a38ef.document;
-    if (!_0xed6383 || Number(_0xed6383.fields?.dbg?.integerValue)===1 || _0xed6383.fields?.dev?.booleanValue) continue;
-    const _0x4fa8cc = _0xed6383.fields?.[_0x104f28], _0x2526c2 = Number(_0x4fa8cc?.integerValue ?? _0x4fa8cc?.doubleValue);
-    if (!Number.isFinite(_0x2526c2)) continue;
-    const _0x15de3f = _0xed6383.name.split("/").pop() ?? "", _0x312be4 = Number(_0xed6383.fields?.title?.integerValue);
-    _0x1cac60.push({
-      "key": _0x15de3f,
-      "id": _0xed6383.fields?.id?.stringValue ?? "???",
-      "value": _0x2526c2,
-      ...Number.isFinite(_0x312be4) && _0x312be4 > 0 ? {
-        "title": _0x312be4
-      } : {},
-      ...Number(_0xed6383.fields?.dbg?.integerValue) === 1 ? {
-        "dbg": !0
-      } : {}
-    });
-  }
-  return _0x1cac60;
+function tc(response,field) {
+ const rows=[];
+ for(const item of Array.isArray(response)?response:[]) {
+  const doc=item.document;if(!doc) continue;
+  const data=Object.fromEntries(Object.entries(doc.fields??{}).map(([key,value])=>[key,value.integerValue!==undefined?Number(value.integerValue):value.doubleValue??value.booleanValue??value.stringValue]));
+  if(data.dbg===1||data.dev||data.rankBan) continue;
+  rows.push(rankingRow(data,field,doc.name.split('/').pop()??''));
+ }
+ return sortRanking(rows,field);
 }
 function ec(_0x499dad, _0x5ba5b6) {
+  data_st(_0x499dad,_0x5ba5b6);
   const _0x5215a7 = data_b0(_0x499dad);
   (_0x5215a7.title = data_V0(_0x499dad).no, _0x499dad.dbg && (_0x5215a7.dbg = 1));
   const _0x8ffb12 = data_ze(_0x5ba5b6);
@@ -2980,17 +2961,15 @@ class RankingService {
     const _0xf60b7b = _0x564e04 ? data_h0(data_ze(_0xed07d9), _0x1e188f) : _0x1e188f, _0x12fc9c = this.acct() + "|" + _0xf60b7b, _0x2ffa38 = this.cache.get(_0x12fc9c);
     if (_0x2ffa38 && !_0x8ddc39 && _0xed07d9 - _0x2ffa38.at < 30000) return _0x2ffa38.board;
     const _0x303f18 = data_Qa(_0x1e188f), _0x2c013c = await _0x328f5f.me(), _0x2c119f = await _0x328f5f.top(_0xf60b7b, _0x303f18, sc), _0x18cce4 = (_0x564e04 ? data_st(_0x772813, _0xed07d9) : data_b0(_0x772813))[_0x1e188f], _0x57d41c = _0x772813.rankBan ? null : (_0x18cce4 ?? _0x2c119f.find(_0x1e9f25 => _0x1e9f25.key === _0x2c013c.key)?.value) ?? null;
-    let _0x2af277 = null;
-    if (_0x57d41c !== null) {
-      if (_0x2c119f.some(_0x244cba => _0x244cba.key === _0x2c013c.key)) _0x2af277 = _0x2c119f.findIndex(_0x419eda => _0x303f18 ? _0x419eda.value >= _0x57d41c : _0x419eda.value <= _0x57d41c) + 1; else {
-        const _0x5b7114 = await _0x328f5f.better(_0xf60b7b, _0x303f18, _0x57d41c).catch(() => null);
-        _0x2af277 = _0x5b7114 === null ? null : _0x5b7114 + 1;
-      }
-    }
+    const myRow=_0x2c119f.find(row=>row.key===_0x2c013c.key);
+    const myScores=_0x564e04?data_st(_0x772813,_0xed07d9):data_b0(_0x772813);
+    const myRecord=myRow??rankingRow(myScores,_0x1e188f,_0x2c013c.key);
+    const _0x2af277=_0x57d41c===null?null:myRow?.rank??(1+_0x2c119f.filter(row=>compareRecords(row,myRecord,_0x1e188f)<0).length);
     const _0x1c33fe = {
       "rows": _0x2c119f,
       "myRank": _0x2af277,
       "myValue": _0x57d41c,
+      myCurse:myRecord.curse,myTime:myRecord.time,
       "myKey": _0x772813.rankBan ? "" : _0x2c013c.key
     };
     return (this.cache.set(_0x12fc9c, {
@@ -3002,6 +2981,19 @@ class RankingService {
     const _0x5e6b51 = data_f0(_0x5cfeba), _0x2118c7 = this.acct() + "|" + _0x5e6b51;
     let _0x2a3427 = this.claims.get(_0x2118c7);
     return (_0x2a3427 || (_0x2a3427 = this.checkRewards(_0x4aa79c, _0x5cfeba).catch(_0x356bd4 => (this.claims.delete(_0x2118c7), this.lastError = _0x356bd4 instanceof oa ? _0x356bd4.code : "net", [])), this.claims.set(_0x2118c7, _0x2a3427)), _0x2a3427.then(_0x474a97 => !_0x474a97.length || this.announced.has(_0x2118c7) ? [] : (this.announced.add(_0x2118c7), _0x474a97)));
+  }
+  async syncTitles(save,at=ta()) {
+    const backend=this.backend();if(!backend) return;
+    if(accountStore.session?.kind==='firebase') {
+      return fetchRankTitles(save,await accountStore.authToken(),BACKEND_CONFIG.projectId,at);
+    }
+    const uid=(await backend.me()).key,key='soul_rank_titles_v1',week=data_ze(at);
+    let snapshot;try{snapshot=JSON.parse(localStorage.getItem(key)??'null');}catch{}
+    if(snapshot?.week!==week) {
+      const holders={};for(const category of ALL_TIME_CATEGORIES) holders[category]=(await backend.top(category,false,50)).filter(row=>row.rank===1).map(row=>row.key);
+      snapshot={week,holders};localStorage.setItem(key,JSON.stringify(snapshot));
+    }
+    return setRankTitleSnapshot(save,snapshot,uid,at);
   }
   async checkRewards(_0x4a052d, _0x274733) {
     const _0x1c340a = this.backend();
@@ -3016,7 +3008,7 @@ class RankingService {
     data_Ge(_0x4a052d, _0x274733);
     const _0x53a61d = data_f0(_0x274733), _0xaa4de7 = _0x4a052d.weekly?.prev;
     if (!_0xaa4de7 || _0xaa4de7.key !== _0x53a61d) return [];
-    await _0x1c340a.me();
+    const me=await _0x1c340a.me();
     const _0xf7c7dc = [];
     for (const _0x5452a8 of Object.keys(_0xaa4de7.scores)) {
       if (!data_p0.some(_0x21184f => _0x21184f.key === _0x5452a8)) continue;
@@ -3025,7 +3017,7 @@ class RankingService {
       const _0x22b606 = data_u0(_0x5452a8);
       if (!_0x22b606) continue;
       const _0x5c015c = (await _0x1c340a.top(data_h0(_0x53a61d, _0x5452a8), data_Qa(_0x5452a8), 20)).filter(_0x580bdb => !_0x580bdb.dbg), _0x2b5127 = _0xaa4de7.scores[_0x5452a8];
-      !_0x5c015c[0] || _0x2b5127 === void 0 || _0x2b5127 !== _0x5c015c[0].value || (_0x4a052d.rankClaims[_0x29f463] = !0, _0x4a052d.stones += _0x22b606.stones, _0x4a052d.compass = (_0x4a052d.compass ?? 0) + _0x22b606.compass, _0x4a052d.stats.weeklyWins = (_0x4a052d.stats.weeklyWins ?? 0)+1, _0xf7c7dc.push({
+      !_0x5c015c.some(row=>row.key===me.key&&row.rank===1) || _0x2b5127 === void 0 || (_0x4a052d.rankClaims[_0x29f463] = !0, _0x4a052d.stones += _0x22b606.stones, _0x4a052d.compass = (_0x4a052d.compass ?? 0) + _0x22b606.compass, _0x4a052d.stats.weeklyWins = (_0x4a052d.stats.weeklyWins ?? 0)+1, _0xf7c7dc.push({
         "week": _0x53a61d,
         "cat": _0x5452a8,
         ..._0x22b606
@@ -3264,7 +3256,7 @@ function fc(_0x50481d, _0x5e910b) {
 }
 function lc(_0x33a23a) {
   const _0x3c6745 = ci(_0x33a23a), _0x1b2674 = [];
-  (_0x3c6745.stones && _0x1b2674.push("계약석 +" + _0x3c6745.stones.toLocaleString()), _0x3c6745.crystals && _0x1b2674.push("영혼 결정 +" + _0x3c6745.crystals.toLocaleString()), _0x3c6745.awShards && _0x1b2674.push("각성 파편 +" + _0x3c6745.awShards), _0x3c6745.compass && _0x1b2674.push("별의 나침반 +" + _0x3c6745.compass), _0x3c6745.mats && _0x1b2674.push("보스의 정수 +" + _0x3c6745.mats.join("/")));
+  (_0x3c6745.stones && _0x1b2674.push("영혼석 +" + _0x3c6745.stones.toLocaleString()), _0x3c6745.crystals && _0x1b2674.push("영혼 결정 +" + _0x3c6745.crystals.toLocaleString()), _0x3c6745.awShards && _0x1b2674.push("각성 파편 +" + _0x3c6745.awShards), _0x3c6745.compass && _0x1b2674.push("별의 나침반 +" + _0x3c6745.compass), _0x3c6745.mats && _0x1b2674.push("보스의 정수 +" + _0x3c6745.mats.join("/")));
   for (const [_0x5ba5fb, _0x4dd10b] of Object.entries(_0x3c6745.chars ?? ({}))) _0x1b2674.push("영웅 " + CHARACTERS[_0x5ba5fb].name + "(Lv" + _0x4dd10b.lv + "·각성" + _0x4dd10b.aw + ")");
   for (const [_0x4034c3, _0x4ebbcb] of Object.entries(_0x3c6745.weapons ?? ({}))) _0x1b2674.push("무기 " + WEAPONS[_0x4034c3].name + "(재련" + _0x4ebbcb.rf + (_0x4ebbcb.en ? "·+" + _0x4ebbcb.en : "") + ")");
   return (_0x3c6745.storyMax && _0x1b2674.push("스토리 해금 ~" + _0x3c6745.storyMax), _0x1b2674.join(", ") || "없음");
@@ -3276,7 +3268,7 @@ const Hf = [{
 }, {
   "act": "currency",
   "label": "재화 초기화",
-  "desc": "계약석·영혼 결정·각성 파편·별의 나침반·보스의 정수를 0으로"
+  "desc": "영혼석·영혼 결정·각성 파편·별의 나침반·보스의 정수를 0으로"
 }, {
   "act": "upgrades",
   "label": "강화 초기화",
@@ -3320,6 +3312,7 @@ function Cf(_0x5d2fd8, _0x3f03b6) {
     }
     if ((_0x3b5261.has("units") && (_0x5d2fd8.chars = _0x58ea0f.chars, _0x5d2fd8.weapons = _0x58ea0f.weapons, _0x5d2fd8.loadout = _0x58ea0f.loadout, _0x5d2fd8.newChars = []), _0x3b5261.has("progress"))) {
       (_0x5d2fd8.story = 1, _0x5d2fd8.storyMax = 1, _0x5d2fd8.book = 1, _0x5d2fd8.storyClear = {}, _0x5d2fd8.storySeen = {}, _0x5d2fd8.storyTime = {});
+      for(const key of Object.keys(_0x5d2fd8.rankRecords??{})) if(key==='prog'||key.startsWith('prog_')||key.startsWith('time')) delete _0x5d2fd8.rankRecords[key];
       const _0x28ecb5 = _0x5d2fd8.weekly?.scores;
       if (_0x28ecb5) {
         for (const _0x3a4fe5 of Object.keys(_0x28ecb5)) _0x3a4fe5.startsWith("time") && delete _0x28ecb5[_0x3a4fe5];
@@ -3348,7 +3341,7 @@ function lo(_0x551600) {
   return qf(_0x551600) ? "운영자 보급이 도착했습니다: " + lc(_0x551600.gift ?? ({})) + (_0x551600.reason ? "\n" + _0x551600.reason : "") : "운영 정책 위반으로 제재되었습니다: " + _0x551600.acts.map(_0x21ef68 => Hf.find(_0x4ac1c2 => _0x4ac1c2.act === _0x21ef68)?.label ?? _0x21ef68).join(" · ") + (_0x551600.reason ? " (사유: " + _0x551600.reason + ")" : "");
 }
 const Xf = "saja-audit:4c19e7a2:ledger-of-the-dead", Ct = _0x1dee37 => typeof _0x1dee37 == "number" && Number.isFinite(_0x1dee37) ? Math.round(_0x1dee37) : 0, cs = (_0x521147, _0x2cf8ea) => Object.values(_0x521147 && typeof _0x521147 == "object" ? _0x521147 : {}).reduce((_0x2e020d, _0x842dcf) => _0x2e020d + _0x2cf8ea(_0x842dcf ?? ({})), 0), pc = {
-  "stones": "계약석",
+  "stones": "영혼석",
   "crystals": "영혼 결정",
   "awShards": "각성 파편",
   "compass": "별의 나침반",
@@ -6084,6 +6077,7 @@ class GameApp {
   persist() {
     if (!accountStore.session) return;
     this.hasSave = !0;
+    data_st(this.save,ta());
     if(developerService.authorized){this.save.developerRole=developerService.role.kind;this.save.rankBan=true;this.save.dbg=true;}
     const _0x12ec95 = en(this.save);
     if (this.auditObj === this.save && this.auditBase) {
@@ -6091,6 +6085,7 @@ class GameApp {
       _0xee1fa8 && Vs.flag("gain", yc(_0xee1fa8), _0x12ec95);
     }
     (this.auditObj = this.save, this.auditBase = _0x12ec95, this.save.seal = Tn(this.save), Vs.tick(_0x12ec95), this.saveFailed = !accountStore.write(this.save));
+    ns.submit(this.save);
   }
   toast(_0x254d2f, _0x5a8393 = "#f0e8d8") {
     (this.toasts.push({
@@ -6115,7 +6110,7 @@ class GameApp {
   cheats() {
     if(!developerService.authorized) {this.setDebug(false);return;}
     const _0x4bc575 = _0x14ed23 => this.input.raw("Digit" + _0x14ed23) || this.input.raw("Numpad" + _0x14ed23), _0x39a2ee = this.scene.room, _0x1b6fca = () => (_0x39a2ee || this.toast("전투 공간(거점·런)에서만 사용할 수 있다", "#ff9090"), !!_0x39a2ee);
-    if ((_0x4bc575(1) && _0x1b6fca() && (_0x39a2ee.god = !_0x39a2ee.god, this.toast("무적 " + (_0x39a2ee.god ? "ON" : "OFF"), "#80ffa0")), _0x4bc575(2) && (this.save.stones += 10000, this.save.crystals += 10000, this.save.compass = (this.save.compass ?? 0) + 10000, this.save.awShards += 10000, this.save.mats = this.save.mats.map(_0x59bec3 => (_0x59bec3 ?? 0) + 10000), this.persist(), this.toast("계약석·영혼 결정·별의 나침반·각성 파편·보스의 정수(1~4권) 각 +10000", "#80ffa0")), _0x4bc575(3) && _0x1b6fca())) {
+    if ((_0x4bc575(1) && _0x1b6fca() && (_0x39a2ee.god = !_0x39a2ee.god, this.toast("무적 " + (_0x39a2ee.god ? "ON" : "OFF"), "#80ffa0")), _0x4bc575(2) && (this.save.stones += 10000, this.save.crystals += 10000, this.save.compass = (this.save.compass ?? 0) + 10000, this.save.awShards += 10000, this.save.mats = this.save.mats.map(_0x59bec3 => (_0x59bec3 ?? 0) + 10000), this.persist(), this.toast("영혼석·영혼 결정·별의 나침반·각성 파편·보스의 정수(1~4권) 각 +10000", "#80ffa0")), _0x4bc575(3) && _0x1b6fca())) {
       let _0x4e7daa = 0;
       for (const _0x3a334c of _0x39a2ee.allEnemies()) if (!(_0x3a334c.dead || _0x3a334c.def.ai === "dummy")) {
         if (("intro" in _0x3a334c)) {
@@ -26913,7 +26908,7 @@ class CombatRoom {
       case "stone":
         {
           const _0x12eea5 = _0x58585d.gain(_0xf94250.value, 0).stones;
-          (this.fx.number(this.player.cx, this.player.b.y - 8, "계약석 +" + _0x12eea5, "#9ec0ff"), w.play("gem"));
+          (this.fx.number(this.player.cx, this.player.b.y - 8, "영혼석 +" + _0x12eea5, "#9ec0ff"), w.play("gem"));
           break;
         }
       case "crystal":
@@ -27342,7 +27337,8 @@ function O2(_0x1c1611, _0x36076f, _0x56f7bb) {
     const target=selectedWeapon(_0x36076f,WEAPONS);
     return {
       "kind": _0x1c1611,
-      "items": data_ve.map(_0x1720a6 => ({
+      eightUnlocked:!!_0x36076f.eightUnlocked,
+      "items": data_ve.filter(weapon=>weapon.rarity<8||_0x36076f.eightUnlocked).map(_0x1720a6 => ({
         "id": _0x1720a6.id,
         "rarity": _0x1720a6.rarity
       })),
@@ -33557,7 +33553,7 @@ class SettingsScene {
     const _0x4d442e = _0x3eef0f => {
       try {
         const _0x1f924f = normalizeSave(_0x3eef0f);
-        return "스토리 " + _0x1f924f.storyMax + " · 계약석 " + _0x1f924f.stones.toLocaleString() + " · 영혼 결정 " + _0x1f924f.crystals.toLocaleString() + " · 영웅 " + Object.keys(_0x1f924f.chars).length + " · 런 " + _0x1f924f.stats.runs + "회";
+        return "스토리 " + _0x1f924f.storyMax + " · 영혼석 " + _0x1f924f.stones.toLocaleString() + " · 영혼 결정 " + _0x1f924f.crystals.toLocaleString() + " · 영웅 " + Object.keys(_0x1f924f.chars).length + " · 런 " + _0x1f924f.stats.runs + "회";
       } catch {
         return "(읽을 수 없는 기록)";
       }
@@ -34047,7 +34043,7 @@ class RunResultsScene {
       "crystals": _0x326af8.reduce((_0x343538, _0x49143d) => _0x343538 + _0x49143d.crystals, 0),
       "compass": _0x326af8.reduce((_0x186fa2, _0x3091c6) => _0x186fa2 + _0x3091c6.compass, 0)
     }, _0x4a0a7a = this.sum.stones + this.sum.bonusStones + this.sum.runStones + _0x14b39e.stones;
-    drawText(_0x22bd29, "계약석 +" + _0x4a0a7a, 266, 86, {
+    drawText(_0x22bd29, "영혼석 +" + _0x4a0a7a, 266, 86, {
       "size": 8,
       "color": "#9ec0ff"
     });
@@ -34059,14 +34055,14 @@ class RunResultsScene {
     }), de(_0x22bd29, "shard", 246, 108, 14, "#40d0e0"), drawText(_0x22bd29, "영혼 결정 +" + (this.sum.crystals + this.sum.endlessCrystals + _0x14b39e.crystals) + (this.sum.endlessCrystals ? " (" + (_0x262448.tower ? "탑" : "무한") + " " + this.sum.endlessCrystals + " 포함)" : ""), 266, 110, {
       "size": 8,
       "color": "#a0f0ff"
-    }), _0x326af8.length && drawText(_0x22bd29, "첫 돌파 보상 " + (_0x326af8.length > 3 ? _0x326af8[0].floor + "~" + _0x326af8[_0x326af8.length - 1].floor + "층" : _0x326af8.map(_0x576ddd => _0x576ddd.floor + "층").join("·")) + ": 계약석 +" + _0x14b39e.stones + " · 영혼 결정 +" + _0x14b39e.crystals + (_0x14b39e.compass ? " · 별의 나침반 +" + _0x14b39e.compass : ""), 244, 121, {
+    }), _0x326af8.length && drawText(_0x22bd29, "첫 돌파 보상 " + (_0x326af8.length > 3 ? _0x326af8[0].floor + "~" + _0x326af8[_0x326af8.length - 1].floor + "층" : _0x326af8.map(_0x576ddd => _0x576ddd.floor + "층").join("·")) + ": 영혼석 +" + _0x14b39e.stones + " · 영혼 결정 +" + _0x14b39e.crystals + (_0x14b39e.compass ? " · 별의 나침반 +" + _0x14b39e.compass : ""), 244, 121, {
       "size": 6,
       "color": "#ffe0a0",
       "bold": !0,
       "maxW": 214
     }));
     const _0x1ecb90 = this.sum.mats.map((_0x1962d4, _0xddb66f) => _0x1962d4 ? data_eo[_0xddb66f] + " +" + _0x1962d4 : "").filter(Boolean);
-    (drawText(_0x22bd29, "보유: 계약석 " + game.save.stones + " · 영혼 결정 " + game.save.crystals + (_0x1ecb90.length ? " · " + _0x1ecb90.join(" ") : ""), 244, 130, {
+    (drawText(_0x22bd29, "보유: 영혼석 " + game.save.stones + " · 영혼 결정 " + game.save.crystals + (_0x1ecb90.length ? " · " + _0x1ecb90.join(" ") : ""), 244, 130, {
       "size": _0x1ecb90.length ? 6 : 7,
       "color": "#c8c0d8",
       "maxW": 214
@@ -34536,7 +34532,7 @@ class RunScene {
 const Zs = [{
   "label": "진행도",
   "cat": () => "prog"
-}, {label:"무한 종합",cat:()=>"endless"}, {label:"보스러쉬 종합",cat:()=>"rush"}, ...BOOKS.map(_0x350b04 => ({
+}, {label:"무한 종합",cat:()=>"endless"}, {label:"보스러쉬 종합",cat:()=>"rush"}, {label:"영혼 결정",cat:()=>"crystals"}, ...BOOKS.map(_0x350b04 => ({
   "label": "무한 " + _0x350b04.name,
   "cat": () => "endless" + _0x350b04.id
 })), ...BOOKS.map(_0x42f661 => ({
@@ -34552,6 +34548,12 @@ const Zs = [{
 function xd(_0x5d3bda) {
   const _0x2a04ea = Math.floor(_0x5d3bda / 3600000), _0x2a6a41 = Math.floor(_0x2a04ea / 24);
   return _0x2a6a41 ? _0x2a6a41 + "일 " + _0x2a04ea % 24 + "시간" : _0x2a04ea ? _0x2a04ea + "시간 " + Math.floor(_0x5d3bda % 3600000 / 60000) + "분" : Math.max(1, Math.ceil(_0x5d3bda / 60000)) + "분";
+}
+function rankRecordText(category,value,curse=0,time=2147483647) {
+ const score=data_k0(category,value);
+ if(category==='crystals') return Number(value).toLocaleString()+'개';
+ if(category==='curse') return score;
+ return score+' · 저주 '+curse+(category.startsWith('time')||time===2147483647?'':' · '+data_k0('time',time));
 }
 class RankingScene {
   constructor(_0x2397ba) {
@@ -34569,6 +34571,7 @@ class RankingScene {
     const _0x480d2b = STORIES.findIndex(_0x2cfbc1 => _0x2cfbc1.id === game.save.story);
     (this.storyIdx = Math.max(0, _0x480d2b), this.load());
     const _0x27d843 = game.save;
+    ns.syncTitles(_0x27d843).catch(()=>{});
     ns.claimRewards(_0x27d843).then(_0x46c0a6 => {
       !_0x46c0a6.length || game.save !== _0x27d843 || (game.persist(), Dl(_0x46c0a6));
     });
@@ -34716,7 +34719,7 @@ class RankingScene {
           if (_0x20659f) {
             let _0x4ef8a5 = 0;
             _0x20659f.rows.slice(0, cf).forEach((_0xc45fb8, _0x53a867) => {
-              (_0x53a867 === 0 || _0xc45fb8.value !== _0x20659f.rows[_0x53a867 - 1].value) && (_0x4ef8a5 = _0x53a867 + 1);
+              _0x4ef8a5 = _0xc45fb8.rank??(_0x53a867+1);
               const _0x2def50 = 74 + _0x53a867 * 9.6, _0x1bd044 = _0xc45fb8.key === _0x20659f.myKey;
               _0x1bd044 && (_0x1e4c11.fillStyle = "rgba(255,200,90,0.22)", _0x1e4c11.fillRect(12, _0x2def50 - 1.5, 456, 9.5), _0x1e4c11.strokeStyle = "#ffc860", _0x1e4c11.strokeRect(12.5, _0x2def50 - 1, 455, 8.5));
               const _0x4e0d81 = _0x4ef8a5 === 1 ? "#ffd040" : _0x4ef8a5 === 2 ? "#d0d8e8" : _0x4ef8a5 === 3 ? "#e0a060" : "#c8c0d8";
@@ -34738,8 +34741,8 @@ class RankingScene {
                 "size": 7,
                 "color": _0x1bd044 ? "#ffe0a0" : "#f0e8d8",
                 "bold": _0x1bd044,
-                "maxW": _0x5a3103 ? 170 : 260
-              }), drawText(_0x1e4c11, data_k0(this.cat, _0xc45fb8.value), 462, _0x2def50, {
+                "maxW": _0x5a3103 ? 130 : 175
+              }), drawText(_0x1e4c11, rankRecordText(this.cat,_0xc45fb8.value,_0xc45fb8.curse,_0xc45fb8.time), 462, _0x2def50, {
                 "size": 7,
                 "align": "right",
                 "color": _0x1bd044 ? "#ffe0a0" : "#e0d8f0",
@@ -34756,19 +34759,19 @@ class RankingScene {
       "glow": "#ffc860"
     });
     let _0x3fc915 = "내 기록: 불러오는 중…";
-    (this.state === "error" ? _0x3fc915 = "내 기록: —" : _0x20659f && (_0x3fc915 = _0x20659f.myValue === null ? "내 기록: 없음 — " + (this.weekly ? "이번 주에 " : "") + "이 부문을 플레이하면 올라갑니다" : "내 순위: " + (_0x20659f.myRank ? _0x20659f.myRank + "위" : "집계 중") + " · " + data_k0(this.cat, _0x20659f.myValue) + (_0x20659f.myRank && _0x20659f.myRank > cf ? " (위 15명 밖)" : "")), _0x2e649d || drawText(_0x1e4c11, _0x3fc915, 240, 225, {
+    (this.state === "error" ? _0x3fc915 = "내 기록: —" : _0x20659f && (_0x3fc915 = _0x20659f.myValue === null ? "내 기록: 없음 — " + (this.weekly ? "이번 주에 " : "") + "이 부문을 플레이하면 올라갑니다" : "내 순위: " + (_0x20659f.myRank ? _0x20659f.myRank + "위" : "집계 중") + " · " + rankRecordText(this.cat,_0x20659f.myValue,_0x20659f.myCurse,_0x20659f.myTime) + (_0x20659f.myRank && _0x20659f.myRank > cf ? " (위 15명 밖)" : "")), _0x2e649d || drawText(_0x1e4c11, _0x3fc915, 240, 225, {
       "size": 7,
       "align": "center",
       "color": "#ffe0a0",
       "bold": !0
     }));
     const _0x4aa9d5 = data_u0("prog");
-    drawText(_0x1e4c11, "매주 일요일 0시(KST) · 진행도·무한 종합·보스러쉬 종합 각 1위 나침반 " + _0x4aa9d5.compass + "개", 240, 239, {
+    drawText(_0x1e4c11, "매주 일요일 0시(KST) · 스토리·보스러쉬·무한·영혼 결정 각 1위 나침반 " + _0x4aa9d5.compass + "개", 240, 239, {
       "size": 6,
       "align": "center",
       "color": "#c0a8ff"
     });
-    const _0x34ca37 = _0x2e649d ? [] : ns.lastRewards, _0x394fdf = _0x34ca37.length ? "지난 주 1위 보상 받음: " + _0x34ca37.map(_0x136976 => data_p0.find(_0x40d1ea => _0x40d1ea.key === _0x136976.cat)?.label ?? _0x136976.cat).join(", ") + " — 별의 나침반 +" + _0x34ca37.reduce((_0x42d428, _0x2bb562) => _0x42d428 + _0x2bb562.compass, 0) : "", _0x461305 = game.save.dbg ? "디버그(D) 계정은 랭킹 보상을 받을 수 없습니다" : "공동 1위(같은 기록)도 모두 받습니다 · D 계정은 보상에서 빠집니다 · 서버 집계 후 접속 시 수령 · 온라인 보상 8주 보관";
+    const _0x34ca37 = _0x2e649d ? [] : ns.lastRewards, _0x394fdf = _0x34ca37.length ? "지난 주 1위 보상 받음: " + _0x34ca37.map(_0x136976 => data_p0.find(_0x40d1ea => _0x40d1ea.key === _0x136976.cat)?.label ?? _0x136976.cat).join(", ") + " — 별의 나침반 +" + _0x34ca37.reduce((_0x42d428, _0x2bb562) => _0x42d428 + _0x2bb562.compass, 0) : "", _0x461305 = game.save.dbg ? "디버그(D) 계정은 랭킹 보상을 받을 수 없습니다" : "동점: 저주 높은 순 → 시간 짧은 순 · 완전 동률은 공동 1위 · 일요일 역대 1위 칭호 교체";
     (drawText(_0x1e4c11, _0x394fdf || _0x461305, 240, 248, {
       "size": 6,
       "align": "center",
@@ -34784,7 +34787,7 @@ function Dl(_0x22292f) {
   }
   for (const _0x5a1a08 of _0x22292f) {
     const _0x4dc3d0 = data_p0.find(_0x59797e => _0x59797e.key === _0x5a1a08.cat)?.label ?? _0x5a1a08.cat;
-    game.toast("지난 주 랭킹 1위 — " + _0x4dc3d0 + "! 계약석 +" + Vf(_0x5a1a08.stones) + ", 별의 나침반 +" + _0x5a1a08.compass, "#ffd040");
+    game.toast("지난 주 랭킹 1위 — " + _0x4dc3d0 + "! 영혼석 +" + Vf(_0x5a1a08.stones) + ", 별의 나침반 +" + _0x5a1a08.compass, "#ffd040");
   }
   w.play("relic");
 }
@@ -34804,6 +34807,7 @@ class TitleScene {
   }
   syncRanking() {
     const _0x4c8d3f = game.save;
+    ns.syncTitles(_0x4c8d3f).catch(()=>{});
     accountStore.session && (data_Ge(_0x4c8d3f, ta()), game.hasSave && ns.submit(_0x4c8d3f), ns.claimRewards(_0x4c8d3f).then(_0x5257ec => {
       !_0x5257ec.length || game.save !== _0x4c8d3f || (game.persist(), Dl(_0x5257ec));
     }));
@@ -35198,3 +35202,5 @@ const developerConsole=installDeveloperConsole({
   weapons: WEAPONS
 });
 export {loadSpriteAsset, fs as app, AccountSaveStore, io as hashPassword, settleRun, CombatRoom, Player, GameRenderer};
+
+export {ns as rankingService};

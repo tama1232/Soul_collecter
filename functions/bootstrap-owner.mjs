@@ -9,7 +9,8 @@ const projectId=process.argv[2];if(!projectId)throw new Error('Usage: node funct
 initializeApp({projectId});const db=getFirestore();
 const manifest=JSON.parse(readFileSync(new URL('./build-manifest.json',import.meta.url)));
 // Never bundle an activation code or its verifier in the public source.
-const candidate='SC-DEV-'+randomBytes(16).toString('hex').toUpperCase();
+const candidate=process.env.SOUL_OWNER_CODE?.trim().toUpperCase() || 'SC-DEV-'+randomBytes(16).toString('hex').toUpperCase();
+if(!/^SC-DEV-[A-F0-9]{32}$/.test(candidate)) throw new Error('SOUL_OWNER_CODE 형식이 올바르지 않습니다');
 const seedHash=hashCode(candidate);
 const created=await db.runTransaction(async tx=>{
   const root=db.doc('developerSystem/root'),settings=db.doc('runtimeConfig/probabilities');

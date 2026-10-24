@@ -44,7 +44,7 @@ test('pity counters guarantee each tier and survive real save normalization', ()
 });
 
 test('all 28 story routes remain playable, and each book has a fixed spoiler-free boss cycle', () => {
-  assert.equal(Object.keys(data.CHARACTERS).length, 56); assert.equal(Object.keys(data.WEAPONS).length, 95); assert.equal(data.STORIES.length, 28);
+  assert.equal(Object.keys(data.CHARACTERS).length, 56); assert.equal(Object.keys(data.WEAPONS).length, 96); assert.equal(data.STORIES.length, 28);
   for (const story of data.STORIES) { const save = data.createSave(); save.storyMax = 28; save.story = story.id; const run = new data.RunState(save, 123); assert.ok(run.nodes.length); assert.equal(run.story, story.id); assert.ok(story.intro.length && story.ending.length); }
   for (const book of data.BOOKS) {
     const save = data.createSave(); assert.equal(isBossTrialUnlocked(save, book.id, data.BOOKS), false);

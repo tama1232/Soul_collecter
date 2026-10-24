@@ -1,3 +1,4 @@
+import {eightContentVisible} from '../config/expansion.js';
 import {selectedWeapon,openWeaponPicker} from './weapon-pickup.js';
 import {getProbabilities} from '../config/live-rules.js';
 import {compassRates, normalRates} from '../config/economy.js';
@@ -92,19 +93,19 @@ class N {
     }
     const _0x4eb884 = game.save.stones, _0x13cc08 = [{
       "label": "1회 계약",
-      "sub": "계약석 " + runtime_H2(1),
+      "sub": "영혼석 " + runtime_H2(1),
       "count": 1,
       "free": !1,
       "ok": _0x4eb884 >= runtime_H2(1)
     }, {
       "label": "10회 계약",
-      "sub": "계약석 " + runtime_H2(10) + " · ★4↑ 확정",
+      "sub": "영혼석 " + runtime_H2(10) + " · ★4↑ 확정",
       "count": 10,
       "free": !1,
       "ok": _0x4eb884 >= runtime_H2(10)
     }, {
       "label": "100회 계약",
-      "sub": "계약석 " + runtime_H2(100) + " · 10회마다 ★4↑",
+      "sub": "영혼석 " + runtime_H2(100) + " · 10회마다 ★4↑",
       "count": 100,
       "free": !1,
       "ok": _0x4eb884 >= runtime_H2(100)
@@ -120,7 +121,7 @@ class N {
   doPull(_0x5da261, _0x1a6199) {
     const _0x2e7e89 = this.kind === "weapon" ? "weapon" : "char", _0x75da4d = game.debug ? this.forceNext[_0x2e7e89] : void 0, _0xbde402 = runtime_Fd(game.save, this.kind, _0x5da261, _0x1a6199, Math.random, _0x75da4d, this.themeIdx());
     if ((_0xbde402 && _0x75da4d && delete this.forceNext[_0x2e7e89], !_0xbde402)) {
-      (runtime_w.play("error"), game.toast(this.kind === "six" ? "별의 나침반이 부족하다 — 주간 1위 보상으로 얻을 수 있다" : "계약석이 부족하다 — 런에서 계약석을 모으자", "#ff8080"));
+      (runtime_w.play("error"), game.toast(this.kind === "six" ? "별의 나침반이 부족하다 — 주간 1위 보상으로 얻을 수 있다" : "영혼석이 부족하다 — 런에서 영혼석을 모으자", "#ff8080"));
       return;
     }
     (game.persist(), this.results = _0xbde402, this.maxR = Math.max(..._0xbde402.map(_0x4e2d29 => _0x4e2d29.rarity)), this.phase = "throw", this.t = 0, this.flipped = 0, this.flipT = 0, runtime_w.play("gacha_throw"));
@@ -205,7 +206,7 @@ class N {
           let _0x4d8b61 = !1;
           if ((_0x13bd1e?.startsWith("gb:") && runtime_kt.mouse.moved && (this.btn = Number(_0x13bd1e.slice(3))), _0x13bd1e?.startsWith("gb:") && runtime_kt.mouse.click && (_0x4d8b61 = !0), _0x13bd1e?.startsWith("gt:") && runtime_kt.mouse.click && (this.banner = Number(_0x13bd1e.slice(3))), _0xbcff84.menu("ok") || _0x4d8b61)) {
             const _0x56ec13 = _0x3f0ad9[this.btn];
-            _0x56ec13.ok ? this.doPull(_0x56ec13.count, _0x56ec13.free) : (runtime_w.play("error"), game.toast(this.kind === "six" ? "별의 나침반이 부족하다" : "계약석이 부족하다", "#ff8080"));
+            _0x56ec13.ok ? this.doPull(_0x56ec13.count, _0x56ec13.free) : (runtime_w.play("error"), game.toast(this.kind === "six" ? "별의 나침반이 부족하다" : "영혼석이 부족하다", "#ff8080"));
           }
           break;
         }
@@ -390,7 +391,7 @@ class N {
       }
       return _0x29b9bb;
     }
-    for (const [_0x30d433, _0xb8626d] of normalRates(!!game.save.eightUnlocked && this.kind!=="weapon")) {
+    for (const [_0x30d433, _0xb8626d] of normalRates(!!game.save.eightUnlocked).filter(([,rate])=>rate>0)) {
       const _0x104cc5 = _0x3f5033.filter(_0x24e494 => _0x24e494.rarity === _0x30d433);
       if (!_0x104cc5.length) continue;
       if(this.kind==='weapon' && _0x30d433===7) {
@@ -425,7 +426,7 @@ class N {
     return _0x29b9bb;
   }
   forceList() {
-    return [...this.kind === "weapon" ? data_ve : CHARACTER_LIST].sort((_0x2b28ca, _0x10656a) => _0x10656a.rarity - _0x2b28ca.rarity);
+    return [...this.kind === "weapon" ? data_ve : CHARACTER_LIST].filter(item=>eightContentVisible(game.save,item)).sort((_0x2b28ca, _0x10656a) => _0x10656a.rarity - _0x2b28ca.rarity);
   }
   static FCOLS = 9;
   static FROWS = 4;
@@ -583,7 +584,7 @@ class N {
     if (this.phase === "menu") this.renderMenu(_0x25e25a); else {
       if (this.phase === "throw") {
         const _0x475af8 = Math.min(1, this.t / 50), _0x84298 = 240, _0x34227f = 280 - Math.sin(_0x475af8 * Math.PI) * 150 - _0x475af8 * 120;
-        (runtime_de(_0x25e25a, "gem", _0x84298 - 8, _0x34227f, 16, "#6a9aff"), _0x25e25a.save(), _0x25e25a.globalCompositeOperation = "lighter", _0x25e25a.fillStyle = "rgba(120,160,255,0.4)", _0x25e25a.beginPath(), _0x25e25a.arc(_0x84298, _0x34227f + 8, 12, 0, Math.PI * 2), _0x25e25a.fill(), _0x25e25a.restore(), drawText(_0x25e25a, "계약석을 바친다…", 240, 240, {
+        (runtime_de(_0x25e25a, "gem", _0x84298 - 8, _0x34227f, 16, "#6a9aff"), _0x25e25a.save(), _0x25e25a.globalCompositeOperation = "lighter", _0x25e25a.fillStyle = "rgba(120,160,255,0.4)", _0x25e25a.beginPath(), _0x25e25a.arc(_0x84298, _0x34227f + 8, 12, 0, Math.PI * 2), _0x25e25a.fill(), _0x25e25a.restore(), drawText(_0x25e25a, "영혼석을 바친다…", 240, 240, {
           "size": 9,
           "align": "center",
           "color": "#c0d0ff"
@@ -623,7 +624,7 @@ class N {
       "size": 12,
       "color": "#9ef0ff",
       "bold": !0
-    }), _0x3020b6.fillStyle = "rgba(10,6,20,0.8)", _0x3020b6.fillRect(350, 6, 124, 16), runtime_de(_0x3020b6, "gem", 354, 9, 10, "#6a9aff"), drawText(_0x3020b6, "계약석 " + _0x465b4e.stones, 368, 9, {
+    }), _0x3020b6.fillStyle = "rgba(10,6,20,0.8)", _0x3020b6.fillRect(350, 6, 124, 16), runtime_de(_0x3020b6, "gem", 354, 9, 10, "#6a9aff"), drawText(_0x3020b6, "영혼석 " + _0x465b4e.stones, 368, 9, {
       "size": 8,
       "color": "#9ec0ff"
     }), _0x3020b6.fillStyle = "rgba(10,6,20,0.8)", _0x3020b6.fillRect(262, 6, 84, 16), le(_0x3020b6, 264, 6, 16), drawText(_0x3020b6, "별의 나침반 " + (_0x465b4e.compass ?? 0), 282, 9, {
@@ -740,7 +741,7 @@ class N {
           }
         } else {
           if (_0x297d41 === "char") {
-            const _0xc06587 = CHARACTER_LIST.filter(_0x53c348 => _0x53c348.rarity >= 6), _0x453fdb = (_0xc06587.length >= 3 ? _0xc06587 : CHARACTER_LIST.filter(_0x599634 => _0x599634.rarity >= 5)).sort((_0x3da283, _0x26af15) => _0x26af15.rarity - _0x3da283.rarity), _0x1151e8 = _0x453fdb.slice(0, 16), _0x5b6a0c = _0x1151e8.length > 8, _0x3ac2a4 = _0x5b6a0c ? Math.ceil(_0x1151e8.length / 2) : _0x1151e8.length, _0x356bb8 = _0x5b6a0c ? 48 : _0x1151e8.length > 6 ? 72 : 96, _0x30f02a = 228 / _0x3ac2a4, _0xfd0d22 = _0x5b6a0c ? [{
+            const _0xc06587 = CHARACTER_LIST.filter(_0x53c348 => _0x53c348.rarity >= 6&&eightContentVisible(game.save,_0x53c348)), _0x453fdb = (_0xc06587.length >= 3 ? _0xc06587 : CHARACTER_LIST.filter(_0x599634 => _0x599634.rarity >= 5&&eightContentVisible(game.save,_0x599634))).sort((_0x3da283, _0x26af15) => _0x26af15.rarity - _0x3da283.rarity), _0x1151e8 = _0x453fdb.slice(0, 16), _0x5b6a0c = _0x1151e8.length > 8, _0x3ac2a4 = _0x5b6a0c ? Math.ceil(_0x1151e8.length / 2) : _0x1151e8.length, _0x356bb8 = _0x5b6a0c ? 48 : _0x1151e8.length > 6 ? 72 : 96, _0x30f02a = 228 / _0x3ac2a4, _0xfd0d22 = _0x5b6a0c ? [{
               "foot": 104,
               "top": 60,
               "h": 46,
@@ -782,7 +783,7 @@ class N {
               "size": 6,
               "align": "right",
               "color": "#c0a8ff"
-            }), drawText(_0x3020b6, "영웅 " + CHARACTER_LIST.length + "명 · 보유 " + Object.keys(_0x465b4e.chars).length + "명", 116, 180, {
+            }), drawText(_0x3020b6, "영웅 " + CHARACTER_LIST.filter(item=>eightContentVisible(game.save,item)).length + "명 · 보유 " + Object.keys(_0x465b4e.chars).length + "명", 116, 180, {
               "size": 7,
               "color": "#c8c0d8"
             }));
@@ -860,7 +861,7 @@ class N {
     }), drawText(_0x3020b6, "별의 나침반 1개 = 1회", 356, 100, {
       "size": 6,
       "color": "#a8c8ff"
-    }), drawText(_0x3020b6, "천장·계약석과 무관 (따로 계산)", 356, 112, {
+    }), drawText(_0x3020b6, "천장·영혼석과 무관 (따로 계산)", 356, 112, {
       "size": 6,
       "color": "#8a8098"
     }), drawText(_0x3020b6, "획득: 일요일 주간 1위 보상", 356, 124, {
@@ -870,7 +871,7 @@ class N {
       "size": 6,
       "color": "#8a8098"
     })); else {
-      normalRates(!!game.save.eightUnlocked && this.kind!=="weapon").filter(([,rate])=>rate>0).forEach(([_0x43d331, _0x1b80e8], _0x30a27d) => {
+      normalRates(!!game.save.eightUnlocked).filter(([,rate])=>rate>0).forEach(([_0x43d331, _0x1b80e8], _0x30a27d) => {
         const _0x2dbbcc = 47 + _0x30a27d * 10;
         (runtime_zn(_0x3020b6, 356, _0x2dbbcc + 1, _0x43d331, _0x43d331 >= 6 ? 4 : 5), drawText(_0x3020b6, +(_0x1b80e8 * 100).toFixed(3) + "%", 466, _0x2dbbcc, {
           "size": 6,

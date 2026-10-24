@@ -28,7 +28,7 @@ function environment() {
   globalThis.matchMedia = () => ({ matches: false, addEventListener() {} });
   globalThis.requestAnimationFrame = () => 1; globalThis.cancelAnimationFrame = () => {};
   globalThis.Image = class { width = 160; height = 96; set src(value) { this.url = value; queueMicrotask(() => this.onload?.()); } };
-  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'soul-collecter-0.4.0' }), headers: new Headers() });
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'soul-collecter-0.5.0' }), headers: new Headers() });
   const originalInterval = globalThis.setInterval;
   globalThis.setInterval = (...args) => { const timer = originalInterval(...args); timer.unref(); return timer; };
   globalThis.CONTRACT_CONFIG = { firebase: { apiKey: '', projectId: '' } };
@@ -78,8 +78,13 @@ test('real game modules boot, create an independent local account, save and rend
     assert.equal(pull[0].rarity,unlocked?8:7);
     const normal=runtime.runtime_Fd(save,'pickup',1,false,()=>0);
     assert.equal(normal[0].rarity,unlocked?8:7);
+    const weapon=runtime.runtime_Fd(save,'weapon',1,false,()=>0);
+    assert.equal(weapon[0].rarity,unlocked?8:7);if(unlocked) assert.equal(weapon[0].id,'nemea_requiem');
+    const secretCodex=new CodexScene(app.scene);
+    assert.equal(secretCodex.characters.some(hero=>hero.id==='anima'),unlocked);
+    assert.equal(secretCodex.weapons.some(weapon=>weapon.id==='nemea_requiem'),unlocked);
     const gacha=new GachaScene(app.scene);
-    for(let banner=0;banner<4;banner++){gacha.banner=banner;gacha.ui(app.r.d);assert.ok(gacha.detailItems().length);}
+    for(let banner=0;banner<4;banner++){gacha.banner=banner;gacha.ui(app.r.d);assert.ok(gacha.detailItems().length);assert.equal(gacha.detailItems().some(item=>item.rarity===8),unlocked);}
   }
   save.storyClear[1]=true;save.loadout.chars=['anima','kael'];save.upgrades={};
   const rush=new data.RunState(save,42);rush.startBossRush(save,1);
