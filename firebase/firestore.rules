@@ -2,8 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
+    function deleting(uid) { return owner(uid) && exists(/databases/$(database)/documents/accountDeletions/$(uid)); }
+    function active() { return signedIn() && !exists(/databases/$(database)/documents/accountDeletions/$(request.auth.uid)); }
     function owner(uid) { return signedIn() && request.auth.uid == uid; }
-    function developer() { return signedIn() && exists(/databases/$(database)/documents/developers/$(request.auth.uid)) && get(/databases/$(database)/documents/developers/$(request.auth.uid)).data.get('enabled', false) == true; }
+    function developer() { return active() && exists(/databases/$(database)/documents/developers/$(request.auth.uid)) && get(/databases/$(database)/documents/developers/$(request.auth.uid)).data.get('enabled', false) == true; }
     function ownerDeveloper() { return developer() && get(/databases/$(database)/documents/developers/$(request.auth.uid)).data.kind == 'owner'; }
     function claimedCode(hash) {
       let before = get(/databases/$(database)/documents/developerCodes/$(hash)).data;
@@ -13,52 +15,102 @@ service cloud.firestore {
     function validGrant(uid) {
       let grant = request.resource.data;
       let code = get(/databases/$(database)/documents/developerCodes/$(grant.grantHash)).data;
-      return owner(uid) && grant.keys().hasOnly(['kind','enabled','grantHash','grantedAt','issuedBy']) && grant.enabled == true && grant.kind == code.kind && grant.issuedBy == code.get('issuedBy','bootstrap') && claimedCode(grant.grantHash) && (grant.kind == 'helper' || grant.kind == 'owner' && getAfter(/databases/$(database)/documents/developerSystem/root).data.uid == uid && getAfter(/databases/$(database)/documents/developerSystem/root).data.claimHash == grant.grantHash);
+      return owner(uid) && active() && grant.keys().hasOnly(['kind','enabled','grantHash','grantedAt','issuedBy']) && grant.enabled == true && grant.kind == code.kind && grant.issuedBy == code.get('issuedBy','bootstrap') && claimedCode(grant.grantHash) && (grant.kind == 'helper' || grant.kind == 'owner' && getAfter(/databases/$(database)/documents/developerSystem/root).data.uid == uid && getAfter(/databases/$(database)/documents/developerSystem/root).data.claimHash == grant.grantHash);
     }
     function everDeveloper(uid) { return exists(/databases/$(database)/documents/developers/$(uid)); }
-    function notBlocked(uid) { return !exists(/databases/$(database)/documents/sanctions/$(uid)) || get(/databases/$(database)/documents/sanctions/$(uid)).data.get('block', false) != true; }
+    function notBlocked(uid) { return active() && (!exists(/databases/$(database)/documents/sanctions/$(uid)) || get(/databases/$(database)/documents/sanctions/$(uid)).data.get('block', false) != true); }
     function rankEligible(uid) { return !everDeveloper(uid) && (!exists(/databases/$(database)/documents/sanctions/$(uid)) || get(/databases/$(database)/documents/sanctions/$(uid)).data.get('rankBan', false) != true); }
     function validSave() {
       return request.resource.data.keys().hasOnly(['id','data','updated','rev','sid']) && request.resource.data.id is string && request.resource.data.id.size() <= 16 && request.resource.data.data is string && request.resource.data.data.size() < 700000 && request.resource.data.updated is int && request.resource.data.rev is int && request.resource.data.sid is string;
     }
-    match /developers/{uid} { allow get: if owner(uid)||developer(); allow create: if validGrant(uid); allow list,update,delete: if false; }
+    function scrubOwnTitle() {
+      return deleting(request.auth.uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['holders']) && request.resource.data.holders.keys() == resource.data.holders.keys() && request.resource.data.holders.diff(resource.data.holders).affectedKeys().hasOnly(['prog', 'rush', 'endless', 'crystals', 'endless1', 'rush1', 'endless2', 'rush2', 'endless3', 'rush3', 'endless4', 'rush4', 'curse', 'time1', 'time2', 'time3', 'time4', 'time5', 'time6', 'time7', 'time8', 'time9', 'time10', 'time11', 'time12', 'time13', 'time14', 'time15', 'time16', 'time17', 'time18', 'time19', 'time20', 'time21', 'time22', 'time23', 'time24', 'time25', 'time26', 'time27', 'time28']) &&
+        request.resource.data.holders.get('prog',[]) == resource.data.holders.get('prog',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('rush',[]) == resource.data.holders.get('rush',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('endless',[]) == resource.data.holders.get('endless',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('crystals',[]) == resource.data.holders.get('crystals',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('endless1',[]) == resource.data.holders.get('endless1',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('rush1',[]) == resource.data.holders.get('rush1',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('endless2',[]) == resource.data.holders.get('endless2',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('rush2',[]) == resource.data.holders.get('rush2',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('endless3',[]) == resource.data.holders.get('endless3',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('rush3',[]) == resource.data.holders.get('rush3',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('endless4',[]) == resource.data.holders.get('endless4',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('rush4',[]) == resource.data.holders.get('rush4',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('curse',[]) == resource.data.holders.get('curse',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time1',[]) == resource.data.holders.get('time1',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time2',[]) == resource.data.holders.get('time2',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time3',[]) == resource.data.holders.get('time3',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time4',[]) == resource.data.holders.get('time4',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time5',[]) == resource.data.holders.get('time5',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time6',[]) == resource.data.holders.get('time6',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time7',[]) == resource.data.holders.get('time7',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time8',[]) == resource.data.holders.get('time8',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time9',[]) == resource.data.holders.get('time9',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time10',[]) == resource.data.holders.get('time10',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time11',[]) == resource.data.holders.get('time11',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time12',[]) == resource.data.holders.get('time12',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time13',[]) == resource.data.holders.get('time13',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time14',[]) == resource.data.holders.get('time14',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time15',[]) == resource.data.holders.get('time15',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time16',[]) == resource.data.holders.get('time16',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time17',[]) == resource.data.holders.get('time17',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time18',[]) == resource.data.holders.get('time18',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time19',[]) == resource.data.holders.get('time19',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time20',[]) == resource.data.holders.get('time20',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time21',[]) == resource.data.holders.get('time21',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time22',[]) == resource.data.holders.get('time22',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time23',[]) == resource.data.holders.get('time23',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time24',[]) == resource.data.holders.get('time24',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time25',[]) == resource.data.holders.get('time25',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time26',[]) == resource.data.holders.get('time26',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time27',[]) == resource.data.holders.get('time27',[]).removeAll([request.auth.uid]) &&
+        request.resource.data.holders.get('time28',[]) == resource.data.holders.get('time28',[]).removeAll([request.auth.uid]);
+    }
+    match /accountDeletions/{uid} {
+      allow get: if owner(uid);
+      allow create: if owner(uid) && request.resource.data.keys().hasOnly(['uid']) && request.resource.data.uid == uid && request.auth.token.auth_time * 1000 >= request.time.toMillis() - 300000;
+      allow update: if owner(uid) && request.resource.data == resource.data;
+      allow list,delete: if false;
+    }
+    match /developers/{uid} { allow get: if owner(uid)||developer(); allow create: if validGrant(uid); allow delete: if deleting(uid); allow list,update: if false; }
     match /admins/{uid} { allow read, write: if false; }
     match /developerCodes/{code} {
       allow get: if signedIn();
-      allow list,delete: if false;
+      allow list,delete: if deleting(request.auth.uid) && (resource.data.get('usedBy','') == request.auth.uid || resource.data.get('issuedBy','') == request.auth.uid);
       allow create: if ownerDeveloper() && code.matches('[a-f0-9]{64}') && request.resource.data.keys().hasOnly(['kind','issuedBy','at','expiresAt']) && request.resource.data.kind == 'helper' && request.resource.data.issuedBy == request.auth.uid && request.resource.data.expiresAt <= request.time.toMillis()+2592000000;
-      allow update: if signedIn() && resource.data.get('usedBy','') == '' && resource.data.get('expiresAt',4102444800000) >= request.time.toMillis() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy','usedAt']) && request.resource.data.usedBy == request.auth.uid && getAfter(/databases/$(database)/documents/developers/$(request.auth.uid)).data.grantHash == code;
+      allow update: if active() && resource.data.get('usedBy','') == '' && resource.data.get('expiresAt',4102444800000) >= request.time.toMillis() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy','usedAt']) && request.resource.data.usedBy == request.auth.uid && getAfter(/databases/$(database)/documents/developers/$(request.auth.uid)).data.grantHash == code;
     }
     match /developerSystem/{state} {
       allow read,create,delete: if false;
       allow update: if state == 'root' && signedIn() && resource.data.get('uid','') == '' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid','claimedAt','claimHash']) && request.resource.data.uid == request.auth.uid && getAfter(/databases/$(database)/documents/developers/$(request.auth.uid)).data.kind == 'owner' && getAfter(/databases/$(database)/documents/developers/$(request.auth.uid)).data.grantHash == request.resource.data.claimHash && claimedCode(request.resource.data.claimHash);
     }
-    match /developerAudit/{event} { allow read: if developer(); allow create: if developer() && request.resource.data.uid == request.auth.uid; allow update,delete: if false; }
-    match /integrityReports/{event} { allow read: if developer(); allow create: if signedIn() && request.resource.data.uid == request.auth.uid; allow update,delete: if false; }
+    match /developerAudit/{event} { allow read: if developer() || deleting(request.auth.uid) && resource.data.uid == request.auth.uid; allow create: if developer() && request.resource.data.uid == request.auth.uid; allow delete: if deleting(request.auth.uid) && resource.data.uid == request.auth.uid; allow update: if false; }
+    match /integrityReports/{event} { allow read: if developer() || deleting(request.auth.uid) && resource.data.uid == request.auth.uid; allow create: if active() && request.resource.data.uid == request.auth.uid; allow delete: if deleting(request.auth.uid) && resource.data.uid == request.auth.uid; allow update: if false; }
     match /runtimeConfig/{config} { allow read: if signedIn(); allow create: if developer() && config == 'probabilities' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.revision == 1; allow update: if developer() && config == 'probabilities' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.revision == resource.data.revision+1; allow delete: if false; }
-    match /rankTitles/{snapshot} { allow read: if signedIn(); allow write: if false; }
-    match /rankTitleSeasons/{week} { allow read,write: if false; }
-    match /weeklyAwards/{uid}/items/{award} { allow read: if owner(uid) && !everDeveloper(uid); allow write: if false; }
+    match /rankTitles/{snapshot} { allow read: if signedIn(); allow update: if scrubOwnTitle(); allow create,delete: if false; }
+    match /rankTitleSeasons/{week} { allow read: if signedIn(); allow update: if scrubOwnTitle(); allow create,delete: if false; }
+    match /weeklyAwards/{uid}/items/{award} { allow read: if owner(uid) && (!everDeveloper(uid) || deleting(uid)); allow delete: if deleting(uid); allow create,update: if false; }
     match /saves/{uid} {
       allow get: if owner(uid) || developer();
       allow list: if developer();
       allow create: if owner(uid) && notBlocked(uid) && validSave() && request.resource.data.rev > 0;
       allow update: if (owner(uid) && notBlocked(uid) || ownerDeveloper()) && validSave() && request.resource.data.rev > resource.data.rev;
-      allow delete: if false;
+      allow delete: if deleting(uid);
     }
     match /rankings/{uid} {
       allow read: if signedIn();
       allow create, update: if owner(uid) && notBlocked(uid) && rankEligible(uid) && request.resource.data.id is string && request.resource.data.get('dbg',0)==0;
-      allow delete: if ownerDeveloper() || owner(uid) && existsAfter(/databases/$(database)/documents/developers/$(uid));
+      allow delete: if deleting(uid) || ownerDeveloper() || owner(uid) && existsAfter(/databases/$(database)/documents/developers/$(uid));
     }
-    match /sanctions/{uid} { allow get: if owner(uid)||developer(); allow list: if developer(); allow create,update: if ownerDeveloper() && request.resource.data.by == request.auth.uid; allow delete: if false; }
-    match /coupons/{code} { allow get: if signedIn(); allow list: if developer(); allow create: if ownerDeveloper() && request.resource.data.createdBy == request.auth.uid; allow update,delete: if false; }
+    match /sanctions/{uid} { allow get: if owner(uid)||developer(); allow list: if developer(); allow create,update: if ownerDeveloper() && request.resource.data.by == request.auth.uid; allow delete: if deleting(uid); }
+    match /coupons/{code} { allow get: if signedIn(); allow list: if developer() || deleting(request.auth.uid) && resource.data.createdBy == request.auth.uid; allow create: if ownerDeveloper() && request.resource.data.createdBy == request.auth.uid; allow delete: if deleting(request.auth.uid) && resource.data.createdBy == request.auth.uid; allow update: if false; }
     match /audit/{record} {
-      allow create: if signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.snap is string && request.resource.data.at is int;
+      allow create: if active() && request.resource.data.uid == request.auth.uid && request.resource.data.snap is string && request.resource.data.at is int;
       allow get,list: if developer() || signedIn() && resource.data.uid == request.auth.uid;
-      allow update,delete: if false;
+      allow delete: if deleting(request.auth.uid) && resource.data.uid == request.auth.uid; allow update: if false;
     }
-    match /flags/{record} { allow create: if signedIn() && request.resource.data.uid == request.auth.uid; allow read: if developer(); allow update,delete: if false; }
+    match /flags/{record} { allow create: if active() && request.resource.data.uid == request.auth.uid; allow read: if developer() || deleting(request.auth.uid) && resource.data.uid == request.auth.uid; allow delete: if deleting(request.auth.uid) && resource.data.uid == request.auth.uid; allow update: if false; }
     match /{document=**} { allow read,write: if false; }
   }
 }

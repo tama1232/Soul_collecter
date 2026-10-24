@@ -1,3 +1,8 @@
+import {deleteCloudAccount} from './systems/account-deletion.js';
+import {unlockOwnerContent} from './config/developer-rules.js';
+import {fitReadableText,textDetail} from './engine/text-details.js';
+import {menuIcon} from './engine/menu-icons.js';
+import {combatCap,effectiveUpgrades,bossBudget,phaseProgress} from './config/story-balance.js';
 import {moveTileBody,moveBodyTo} from './engine/collision.js';
 import {growthNotice} from './config/growth-limits.js';
 import {rankingRow,sortRanking,compareRecords,ALL_TIME_CATEGORIES} from './config/ranking-rules.js';
@@ -2275,6 +2280,11 @@ function drawText(_0x1185bd, _0x9b922f, _0x406568, _0x4b65c2, _0xb4d589 = {}) {
       "align": _0x40b877 === "left" || _0x40b877 === "start" ? "right" : _0x40b877 === "right" || _0x40b877 === "end" ? "left" : _0x40b877
     };
   }
+  _0x1185bd.font=""+(_0xb4d589.bold?'700 ':'')+_0x117c2e+'px '+gn;
+  if(_0xb4d589.maxW&&_0x1185bd.measureText(String(_0x9b922f)).width>_0xb4d589.maxW){
+    if(!Fe.worldCanvases.includes(_0x1185bd.canvas))textDetail(_0x9b922f,_0x406568,_0x4b65c2,_0xb4d589.maxW,_0x117c2e+3,_0xb4d589.align);
+    _0x9b922f=fitReadableText(_0x1185bd,_0x9b922f,_0xb4d589.maxW);
+  }
   (_0x1185bd.font = "" + (_0xb4d589.bold ? "700 " : "") + _0x117c2e + "px " + gn, _0x1185bd.textAlign = _0xb4d589.align ?? "left", _0x1185bd.textBaseline = _0xb4d589.base ?? "top", _0xb4d589.alpha !== void 0 && (_0x1185bd.globalAlpha *= _0xb4d589.alpha), _0xb4d589.shadow !== null && (_0x1185bd.fillStyle = _0xb4d589.shadow ?? "rgba(0,0,0,0.85)", _0x1185bd.fillText(_0x9b922f, _0x406568 + 0.6, _0x4b65c2 + 0.6, _0xb4d589.maxW)), _0x1185bd.fillStyle = _0xb4d589.color ?? "#f0e8d8", _0x1185bd.fillText(_0x9b922f, _0x406568, _0x4b65c2, _0xb4d589.maxW), _0x1185bd.restore());
 }
 function ha(_0x3b49f8, _0x12928e, _0x135a38 = 8, _0x3fee7f = !1) {
@@ -2500,6 +2510,15 @@ class AccountSaveStore {
   }
   signOut() {
     (this.flush(), this.session = null, this.cloud = "off", Ee.del(c0));
+  }
+  async permanentlyDelete(password,onProgress) {
+    const previous=this.session;if(!previous)throw new Error('먼저 로그인하세요');
+    await this.signIn(previous.id,password);
+    clearTimeout(this.timer);this.timer=null;this.pending=null;this.stale=true;
+    if(this.session.kind==='firebase'){let started=false;try{await deleteCloudAccount({auth:await this.authToken(),projectId:BACKEND_CONFIG.projectId,apiKey:BACKEND_CONFIG.apiKey,onProgress,onStarted:()=>{started=true;}});}catch(error){if(!started)this.stale=false;throw error;}}
+    else {const accounts=this.localAccounts();delete accounts[previous.id];Ee.set(eo,JSON.stringify(accounts));}
+    Ee.del(h0(previous));Ee.del(d0(previous));if(Ee.get(ao)===previous.id){Ee.del(Yr);Ee.del(ao);}
+    this.session=null;this.pending=null;this.cloud='off';Ee.del(c0);
   }
   async fresh() {
     const _0x5bb6bd = this.session;
@@ -5266,7 +5285,7 @@ function qc(_0x36eed1, _0x68081, _0x52751d, _0x265436) {
   }
 }
 function Kf(_0x33026c, _0x50185c) {
-  const _0x274496 = Q0[_0x50185c] ?? Q0.idle0, _0x5ee189 = new jc(), _0x2f197a = _0x33026c.build === "big", _0x489a89 = _0x33026c.build === "slim", _0x263c9c = 48, _0x439579 = 12 - (_0x274496.crouch ?? 0) * 2, _0x33df8f = gs - _0x439579, _0x195eb3 = _0x274496.bob > 0 ? Math.min(_0x274496.bob, 1) * 2 : _0x274496.bob * 2, _0x1b8cbd = _0x2f197a ? 15 : _0x489a89 ? 12 : 13, _0x58513a = _0x2f197a ? 16 : _0x489a89 ? 11 : 12, _0x3c87ce = _0x33df8f + _0x195eb3, _0x285341 = _0x3c87ce - _0x1b8cbd, _0x310686 = _0x274496.lean * 2, _0x31cce1 = Math.round(_0x263c9c - _0x58513a / 2 + _0x310686 * 0.5), _0x33699c = _0x274496.cape ?? 0, _0x3fc92e = {
+  const _0x274496 = Q0[_0x50185c] ?? Q0.idle0, _0x5ee189 = new jc(), _0x2f197a = _0x33026c.build === "big", _0x489a89 = _0x33026c.build === "slim", _0x263c9c = 48, _0x439579 = 17 - (_0x274496.crouch ?? 0) * 2, _0x33df8f = gs - _0x439579, _0x195eb3 = _0x274496.bob > 0 ? Math.min(_0x274496.bob, 1) * 2 : _0x274496.bob * 2, _0x1b8cbd = _0x2f197a ? 17 : _0x489a89 ? 14 : 15, _0x58513a = _0x2f197a ? 15 : _0x489a89 ? 10 : 11, _0x3c87ce = _0x33df8f + _0x195eb3, _0x285341 = _0x3c87ce - _0x1b8cbd, _0x310686 = _0x274496.lean * 2, _0x31cce1 = Math.round(_0x263c9c - _0x58513a / 2 + _0x310686 * 0.5), _0x33699c = _0x274496.cape ?? 0, _0x3fc92e = {
     "hx": Math.round(_0x263c9c + 1 + _0x310686),
     "hy": _0x285341 - 8
   }, _0x3ce25c = _0x285341 + 4, _0x3093f8 = _0x31cce1 + _0x58513a - 3, _0x86b6be = _0x31cce1 + 3, _0x1f2d2b = _0x2f197a ? 11 : 10, _0x2e7414 = _0x2f197a ? 3 : 2.5, _0x479a33 = D(_0x33026c.body, 0.28, 0.3), _0xb43e5a = D(ft(_0x33026c.body, 0.25), 0.2, 0.3), _0x23f2bc = D(_0x33026c.trim, 0.35, 0.3), _0x3ec9be = _0x274496.ab * va, _0x2b4f15 = {
@@ -5640,7 +5659,7 @@ function getCharacterSprite(_0x55f44e, _0x150fa1, _0x218251, _0x5e9ea3 = !1) {
 const ko = new Map();
 function Vc(_0x5222fe, _0x4e8a23) {
   const _0x2f23fa = CHARACTERS[_0x5222fe];
-  if (!_0x2f23fa || _0x2f23fa.rarity > 5 || typeof document > "u") return null;
+  if (!_0x2f23fa || _0x2f23fa.rarity > 5 && _0x5222fe!=='anima' || typeof document > "u") return null;
   const _0x37cfb4 = _0x5222fe + "|" + _0x4e8a23;
   let _0x21bc45 = ko.get(_0x37cfb4);
   return (_0x21bc45 || (_0x21bc45 = Kf(_0x2f23fa.look, _0x4e8a23), ko.set(_0x37cfb4, _0x21bc45)), _0x21bc45);
@@ -5843,7 +5862,7 @@ class MenuController {
         "sub": _0x5b6d67.sub,
         "col": _0x5b6d67.col,
         "size": _0x1b39c0
-      }), kt.add(this.id + ":" + _0x479c49, _0x335056, _0x403cf7, _0x30f965, _0x5210cb));
+      }), menuIcon(_0x1a2827,_0x5b6d67.label,_0x335056+12,_0x403cf7+_0x5210cb/2,11), kt.add(this.id + ":" + _0x479c49, _0x335056, _0x403cf7, _0x30f965, _0x5210cb));
     });
   }
 }
@@ -5954,7 +5973,7 @@ class TouchControls {
       const _0x2b9cae = document.createElement("div");
       (_0x2b9cae.dataset.tp = _0x22ed11, _0x2b9cae.textContent = _0x330443, _0x2b9cae.style.cssText = "position:absolute;top:calc(env(safe-area-inset-top,0px) + var(--u)*0.2);" + _0x36872c + ";min-width:calc(var(--u)*0.9);height:calc(var(--u)*0.62);padding:0 calc(var(--u)*0.15);border-radius:calc(var(--u)*0.18);display:flex;align-items:center;justify-content:center;color:#fff;font-size:calc(var(--u)*0.24);font-weight:700;background:rgba(20,12,34,0.55);border:2px solid rgba(200,180,255,0.45);pointer-events:auto;touch-action:none;", _0x50d464.appendChild(_0x2b9cae), this.bindZone(_0x2b9cae, () => [_0x22ed11]));
     };
-    (_0x329738("pause", "Ⅱ 메뉴", "left:50%;transform:translateX(calc(-100% - var(--u)*0.1))"), _0x329738("build", "빌드", "left:50%;transform:translateX(calc(var(--u)*0.1))"));
+    (_0x329738("pause", "⚙ 메뉴", "left:50%;transform:translateX(calc(-100% - var(--u)*0.1))"), _0x329738("build", "▣ 빌드", "left:50%;transform:translateX(calc(var(--u)*0.1))"));
     const _0x4842a5 = document.createElement("button");
     (_0x4842a5.style.cssText = "position:absolute;left:50%;top:calc(env(safe-area-inset-top,0px) + var(--u)*0.2);transform:translateX(calc(var(--u)*1.35));width:calc(var(--u)*0.62);height:calc(var(--u)*0.62);border-radius:8px;border:1px solid rgba(200,180,255,0.45);background:rgba(20,12,34,0.55);color:#e0d8f0;font-size:15px;pointer-events:auto;touch-action:none;padding:0;", _0x4842a5.addEventListener("pointerdown", _0x4e7f65 => {
       (_0x4e7f65.preventDefault(), _0x4e7f65.stopPropagation(), this.hidden = !this.hidden, this.refresh(), this.onToggle?.(this.visible));
@@ -6081,7 +6100,7 @@ class GameApp {
     this.hasSave = !0;
     const capNotice=growthNotice(this.save);if(capNotice)this.toast(capNotice,"#80f0ff");
     data_st(this.save,ta());
-    if(developerService.authorized){this.save.developerRole=developerService.role.kind;this.save.rankBan=true;this.save.dbg=true;}
+    if(developerService.authorized){unlockOwnerContent(this.save,developerService.role,CHARACTERS,BOOKS);this.save.developerRole=developerService.role.kind;this.save.rankBan=true;this.save.dbg=true;}
     const _0x12ec95 = en(this.save);
     if (this.auditObj === this.save && this.auditBase) {
       const _0xee1fa8 = mc(this.auditBase, _0x12ec95, !!this.save.dbg);
@@ -17142,6 +17161,11 @@ class Enemy {
     this.scale = _0x1c0459 ? data_A0.size : 1;
     const _0x457edb = Math.round(_0x5c10e3.w * this.scale), _0x470e0a = Math.round(_0x5c10e3.h * this.scale);
     (this.b = di(_0x25da7e - _0x457edb / 2, _0x385298 - _0x470e0a, _0x457edb, _0x470e0a), this.b.noCrumble = !0, this.maxHp = this.hp = Math.round(_0x5c10e3.hp * _0x73f7e0 * (_0x1c0459 ? data_A0.hp : 1)), this.atk = Math.round(_0x5c10e3.atk * (data_T0[_0x472e8f] ?? 1) * (1 + _0x18d259) * (_0x1c0459 ? data_A0.atk : 1) * _0x56325e.atk), this.curseHaste = 1 + _0x18d259 * 0.06, this.kbRes = _0x1c0459 ? Math.max(_0x5c10e3.kbRes, 0.6) : _0x5c10e3.kbRes, this.defense = _0x5c10e3.def ?? 0, this.name = _0x1c0459 ? "정예 " + _0x5c10e3.name : _0x5c10e3.name, _0x5c10e3.ai === "dummy" && (this.state = "idle", this.st = 0));
+    if(_0x56325e.balance && _0x5c10e3.ai!=='dummy'){
+      const {ref,book,progress}=_0x56325e.balance,role=Math.max(.65,Math.min(1.6,_0x5c10e3.hp/120));
+      this.maxHp=this.hp=Math.round(ref.dps*(1.25+book*.18+progress*.6)*role*(1+_0x18d259)*(_0x1c0459?2.4:1));
+      this.atk=Math.round(ref.hp*(.045+book*.004+progress*.012)*(1+_0x18d259)*(_0x1c0459?1.3:1));
+    }
   }
   b;
   hp;
@@ -21292,6 +21316,7 @@ class Boss extends Enemy {
       "flying": _0x38dafc.flying
     };
     (super(_0x2b59a0, _0x129353, _0x14e5f9, !1, 1, 0, 0), this.bd = _0x38dafc, this.isBoss = !0, this.maxHp = this.hp = Math.round(data_H0(_0x38dafc) * (1 + _0x256be4) * _0x66ab0b.hp), this.atk = Math.round(data_E0(_0x38dafc) * (1 + _0x256be4) * _0x66ab0b.atk), this.curseHaste = 1 + _0x256be4 * 0.06, this.state = "idle", this.st = 0, this.name = _0x38dafc.name, this.b.w = _0x38dafc.orb ? 36 : _0x38dafc.w * 0.6, this.b.h = _0x38dafc.orb ? 36 : _0x38dafc.h, this.b.x = _0x129353 - this.b.w / 2, this.b.y = _0x14e5f9 - this.b.h, this.facing = -1);
+    const budget=bossBudget(this.bd,_0x66ab0b);if(budget){this.maxHp=this.hp=Math.round(budget.hp*(1+_0x256be4));this.atk=Math.round(budget.atk*(1+_0x256be4));}
   }
   get invulnerable() {
     return this.intro > 0 || this.phaseT > 0 || this.deathT > 0;
@@ -21305,9 +21330,10 @@ class Boss extends Enemy {
       return;
     }
     if (this.phaseT > 0) {
-      (this.phaseT--, this.anim = "wind", this.pose = "castUp", this.phaseT % 10 === 0 && _0x243276.fx.ring(this.cx, this.cy, this.bd.col, 60), this.phaseT === 60 && this.splitPending && (this.splitPending = !1, this.doSplit(_0x243276)), this.phaseT === 0 && (this.idleT = 30, this.pattern = ""));
+      (this.phaseT--, this.anim = "wind", this.pose = "castUp", this.phaseT % 10 === 0 && _0x243276.fx.ring(this.cx, this.cy, this.bd.col, 60), this.phaseT === 60 && this.splitPending && (this.splitPending = !1, this.doSplit(_0x243276)), this.phaseT === 0 && (this.idleT = 30, this.pattern = "", this.startMemoryEcho(_0x243276)));
       return;
     }
+    if(this.memoryEcho){this.updateMemoryEcho(_0x243276);return;}
     const _0x264364 = this.bd.phases[this.phase];
     if (_0x264364 !== void 0 && this.hp / this.maxHp <= _0x264364) {
       (this.phase++, this.phaseT = 110, this.pattern = "", this.immune = "", _0x243276.gim4.endExec(), this.subs = [], this.landMark?.end(), this.landMark = null, this.b.vx = 0, w.play("phase"), _0x243276.cam.shake(7, 50), _0x243276.flash("#ffffff", 0.7), _0x243276.bossPhaseBanner(this.phase), (this.bd.id === "king" || this.bd.id === "oblivion") && this.phase === 2 && (_0x243276.darkBoost = 0.25));
@@ -21320,6 +21346,23 @@ class Boss extends Enemy {
       return;
     }
     (this.pt++, this.state = "atk", this.runPattern(_0x243276, this.pattern, this.pt) && (this.pattern = "", this.idleT = Math.round(([40, 28, 18][this.phase] ?? 18) / this.curseHaste), this.anim = "idle", this.state = "idle", this.b.vx = 0, this.landMark?.end(), this.landMark = null));
+  }
+  startMemoryEcho(room) {
+    const book=room.run.power.balance?.book??1;
+    if(book<2||this.twin||room.run.hiddenFight)return;
+    this.memoryEcho={book,t:0,x:room.player.cx,pulse:0};
+    room.bossShout(book===4?'기억의 틈으로!':book===3?'두 번 되울리는 잔향':'발밑에 남은 잔향',this.bd.col);
+  }
+  updateMemoryEcho(room) {
+    const echo=this.memoryEcho;this.b.vx=0;echo.t++;
+    if(echo.t===1||echo.t===111){
+      const width=room.world.pxW,height=room.world.pxH-32;
+      if(echo.book===4){const safe=Math.max(72,Math.min(width-72,room.player.cx+(room.player.cx<width/2?52:-52)));echo.lanes=[{x:16,y:16,w:Math.max(0,safe-48-16),h:height},{x:safe+48,y:16,w:Math.max(0,width-16-safe-48),h:height}];room.marker(safe-48,16,96,height,90,'#80ffd0',false);}
+      else {echo.x=room.player.cx;echo.lanes=[{x:echo.x-28,y:16,w:56,h:height}];}
+      for(const lane of echo.lanes)if(lane.w>0)room.marker(lane.x,lane.y,lane.w,lane.h,90,this.bd.col,true);
+    }
+    if(echo.t===91||echo.t===201){for(const lane of echo.lanes)if(lane.w>0)room.enemyHit(lane,this.atk*.7,this.cx,'기억의 잔향');room.cam.shake(4,12);}
+    if(echo.t>=(echo.book>=3?222:112)){this.memoryEcho=null;this.idleT=45;}
   }
   get executing() {
     return !!this.pattern && Ye.has(this.pattern) && !this.dead;
@@ -22782,6 +22825,7 @@ class RunBuild {
       for (let _0x388fa7 = 0; _0x388fa7 < _0x51652c.tier; _0x388fa7++) _0x4587d2.push(..._0x3549bf.tiers[_0x388fa7].effects);
     }
     const _0x516fe0 = _0x1e0e97.party[_0x1e0e97.active], _0x3e6453 = CHARACTERS[_0x516fe0.id];
+    if(_0x3e6453?.rarity===7)_0x4587d2.push({stats:{allDmg:.15,hpPct:.08}});
     if ((this.mods = [], _0x3e6453)) {
       _0x4587d2.push(..._0x3e6453.passive.effects);
       for (let _0x2941a9 = 0; _0x2941a9 < _0x516fe0.aw; _0x2941a9++) {
@@ -22789,12 +22833,12 @@ class RunBuild {
         (_0x4e1f85.effects && _0x4587d2.push(..._0x4e1f85.effects), _0x4e1f85.mods && this.mods.push(..._0x4e1f85.mods));
       }
     }
-    (this.mods.push(...data_S0(_0x42d556.chars[_0x516fe0.id]?.sk)), this.weaponEn = _0xf1404a ? data_v0(_0x42d556, _0xf1404a.id) : 0, this.weaponEn > 0 && _0x4587d2.push({
+    (this.mods.push(...data_S0(_0x42d556.chars[_0x516fe0.id]?.sk?.map(value=>Math.min(value,combatCap(_0x42d556,_0x1e0e97))))), this.weaponEn = _0xf1404a ? data_v0(_0x42d556, _0xf1404a.id) : 0, this.weaponEn > 0 && _0x4587d2.push({
       "stats": {
         "allDmg": data_y0(this.weaponEn)
       }
     }), _0xf1404a?.owner && _0xf1404a.sigMods && _0x516fe0.id === _0xf1404a.owner && this.mods.push(..._0xf1404a.sigMods), this.crests = bl(_0x3d9018), _0x4587d2.push(...R1(this.crests)));
-    const _0x3c888b = _0x42d556.upgrades, _0xb27f8f = _0x3d29b4 => data_fe(_0x3c888b, _0x3d29b4) / 100, _0x113eba = {
+    const _0x3c888b = effectiveUpgrades(_0x42d556,_0x1e0e97), _0xb27f8f = _0x3d29b4 => data_fe(_0x3c888b, _0x3d29b4) / 100, _0x113eba = {
       "atk": _0xb27f8f("atk") + _0x1e0e97.bonusAtk,
       "crit": _0xb27f8f("crit"),
       "swapCdr": _0xb27f8f("swap"),
@@ -23856,11 +23900,11 @@ class Player {
     return _0x2b2d37.length > 1 && _0x2b2d37[1 - this.room.activeIdx].id !== _0x2b2d37[this.room.activeIdx].id ? _0x2b2d37[1 - this.room.activeIdx] : null;
   }
   atk() {
-    const _0x5aafa8 = this.member, _0x156c29 = WEAPONS[this.room.weapon.id];
+    const _0x5aafa8 = {...this.member,lv:Math.min(this.member.lv,combatCap(this.room.save,this.room.run))}, _0x156c29 = WEAPONS[this.room.weapon.id];
     return P1(this.def.atk, _0x5aafa8.lv, _0x156c29 ? _0x156c29.atk * (1 + 0.15 * (this.room.weapon.rf - 1)) * (1 + data_w0(this.room.build.weaponEn)) : 0) * (1 + _0x5aafa8.aw * 0.03);
   }
   maxHpBase() {
-    const _0x6c781b = this.room.party.map(_0x31498d => T1(CHARACTERS[_0x31498d.id].hp, _0x31498d.lv));
+    const _0x6c781b = this.room.party.map(_0x31498d => T1(CHARACTERS[_0x31498d.id].hp, Math.min(_0x31498d.lv,combatCap(this.room.save,this.room.run))));
     return Math.round(_0x6c781b.reduce((_0x5f6fb4, _0x172a4b) => _0x5f6fb4 + _0x172a4b, 0) / _0x6c781b.length);
   }
   overlaps(_0x4cdfd9) {
@@ -23925,7 +23969,7 @@ class Player {
     (this.b.vx < _0xdde979 ? this.b.vx = Math.min(_0xdde979, this.b.vx + _0x1f8ab9) : this.b.vx > _0xdde979 && (this.b.vx = Math.max(_0xdde979, this.b.vx - _0x1f8ab9)), this.jumpBuf > 0 && (_0x2d1b02.down && this.b.onGround && _0x4010c1.world.onOneWay(this.b) ? (this.b.dropTimer = 12, this.b.y += 2, this.jumpBuf = 0) : this.b.onGround || this.coyote > 0 ? (this.b.vy = H1 * this.jumpMul, this.coyote = 0, this.jumpBuf = 0, w.play("jump"), _0x4010c1.fx.dust(this.cx, this.b.y + this.b.h, 3)) : this.jumps > 0 && (this.jumps--, this.b.vy = C1 * this.jumpMul, this.jumpBuf = 0, w.play("djump"), _0x4010c1.fx.ring(this.cx, this.b.y + this.b.h, "#ffffff", 10, 10))), !_0x2d1b02.jumpH && this.b.vy < -2 && (this.b.vy *= 0.82), this.b.vy = Math.min(j0, this.b.vy + E0), this.atkBuf > 0 && (this.dashAtkWin > 0 ? this.tryAction("dashAtk") : this.b.onGround ? this.tryAction("combo") : this.tryAction("air")));
   }
   canDash() {
-    return !(this.state === "dead" || this.dashCharges <= 0 || this.state === "dash" || this.plunge || !this.b.onGround && this.airDashes >= 1 + this.room.build.flag("airDash"));
+    return !(this.state === "dead" || this.dashCharges <= 0 || this.state === "dash" || this.state === "act" && this.actF<Math.min(8,this.act?.cancel??8) || this.state === "hurt" || this.plunge || !this.b.onGround && this.airDashes >= 1 + this.room.build.flag("airDash"));
   }
   startDash(_0x31d2f5) {
     const _0x3833f9 = (_0x31d2f5.right ? 1 : 0) - (_0x31d2f5.left ? 1 : 0);
@@ -23939,7 +23983,7 @@ class Player {
     this.dashT <= 0 && (this.state = "normal", this.b.vx = this.facing * 2.5, this.dashAtkWin = 8);
   }
   canSwap() {
-    return this.swapCd <= 0 && this.other !== null && this.state !== "dead";
+    return this.swapCd <= 0 && this.other !== null && this.state !== "dead" && this.state!=="hurt" && this.state!=="dash" && !(this.state==='act'&&this.actF<(this.act?.cancel??this.act?.dur??0));
   }
   swapCooldowns() {
     const _0x514aa2 = this.bench;
@@ -23982,16 +24026,16 @@ class Player {
     return (this.atkBuf = 0, this.endAct(), this.heldDir && (this.facing = this.heldDir), this.startAction(_0x5642da, _0x39b890), !0);
   }
   startAction(_0x271b3f, _0x2b9f1d) {
-    (this.state = "act", this.act = _0x2b9f1d, this.actKind = _0x271b3f, this.actF = 0, this.fired = 0, this.moveIdx = 0, this.sortedEv = [..._0x2b9f1d.ev].sort((_0x3de8b6, _0x15ac37) => _0x3de8b6.t - _0x15ac37.t), this.hitThisAct = !1, this.armorNow = !!_0x2b9f1d.armor || this.def.id === "balt", this.atkBuf = 0, this.moveBuf = 0, this.moveBufT = 0, this.applyMoves(), this.fireEvents());
+    (this.state = "act", this.act = _0x2b9f1d, this.actKind = _0x271b3f, this.actF = 0, this.fired = 0, this.b.vx=0, this.dashT=0, this.moveIdx = 0, this.sortedEv = [..._0x2b9f1d.ev].sort((_0x3de8b6, _0x15ac37) => _0x3de8b6.t - _0x15ac37.t), this.hitThisAct = !1, this.armorNow = !!_0x2b9f1d.armor || this.def.id === "balt", this.atkBuf = 0, this.moveBuf = 0, this.moveBufT = 0, this.applyMoves(), this.fireEvents());
   }
   endAct() {
-    (this.state === "act" && this.actKind === "combo" && (this.comboWin = 28), this.act = null, this.plunge = null, this.armorNow = !1, this.state === "act" && (this.state = "normal"));
+    (this.state === "act" && this.actKind === "combo" && (this.comboWin = 28), this.act = null, this.plunge = null, this.armorNow = !1, this.dashT=0, this.b.vx=Math.max(-this.moveSpeed(),Math.min(this.moveSpeed(),this.b.vx)), this.state === "act" && (this.state = "normal"));
   }
   applyMoves() {
     const _0x2c1e71 = this.act;
     if (!(!_0x2c1e71 || !_0x2c1e71.move)) for (; this.moveIdx < _0x2c1e71.move.length && _0x2c1e71.move[this.moveIdx][0] <= this.actF; ) {
-      const [_0x2784d4, _0x1088ec] = _0x2c1e71.move[this.moveIdx];
-      (this.b.vx = _0x2784d4 * this.facing, _0x1088ec !== void 0 && (this.b.vy = _0x1088ec), this.moveIdx++);
+      const [, _0x2784d4, _0x1088ec] = _0x2c1e71.move[this.moveIdx];
+      (this.b.vx = this.actKind==='swap'?0:Math.max(-6.6,Math.min(6.6,_0x2784d4))*this.facing, _0x1088ec !== void 0 && (this.b.vy = _0x1088ec), this.moveIdx++);
     }
   }
   fireEvents() {
@@ -24003,6 +24047,7 @@ class Player {
   updateAct(_0x4fa1ec) {
     const _0x4aa728 = this.act, _0x7dc1ca = this.actKind === "combo" || this.actKind === "air" || this.actKind === "dashAtk", _0x4353a9 = _0x7dc1ca ? Math.min(2, 1 + (this.room.stats.aspd ?? 0)) : 1;
     (this.actF += _0x4353a9, this.applyMoves(), this.fireEvents());
+    if(this.act!==_0x4aa728)return;
     const _0x37df6f = (_0x4fa1ec.right ? 1 : 0) - (_0x4fa1ec.left ? 1 : 0);
     if ((!this.b.onGround && (this.actKind === "air" || this.actKind === "skill1" || this.actKind === "skill2") && _0x37df6f && !_0x4aa728.move && (this.b.vx += _0x37df6f * 0.15), this.plunge)) {
       if ((this.b.vy = this.plunge.vy, this.b.vx *= 0.9, this.b.onGround)) {
@@ -26108,8 +26153,8 @@ class CombatRoom {
     switch (_0x1c04cb.k) {
       case "hit":
         {
-          const [_0x3740eb, _0x434cbc, _0x278237, _0x367963] = _0x1c04cb.box, _0x5cd656 = _0x278237 * _0x466538, _0x5c9b03 = _0x367963 * (1 + _0x1daa47.size * 0.5), _0x3f4da6 = {
-            "x": _0x2405ff > 0 ? _0x5d386a.cx + _0x3740eb : _0x5d386a.cx - _0x3740eb - _0x5cd656,
+          const [_0x3740eb, _0x434cbc, _0x278237, _0x367963] = _0x1c04cb.box, basicMelee=["combo","air","dashAtk"].includes(_0x34f982), hitOffset=basicMelee?Math.min(4,_0x3740eb):_0x3740eb, _0x5cd656 = Math.min(_0x278237,basicMelee?Math.max(16,(_0x1c04cb.fx?.r??42)*1.15-Math.max(0,_0x3740eb)):_0x278237) * _0x466538, _0x5c9b03 = _0x367963 * (1 + _0x1daa47.size * 0.5), _0x3f4da6 = {
+            "x": _0x2405ff > 0 ? _0x5d386a.cx + hitOffset : _0x5d386a.cx - hitOffset - _0x5cd656,
             "y": _0x5d386a.cy + _0x434cbc - (_0x5c9b03 - _0x367963) / 2,
             "w": _0x5cd656,
             "h": _0x5c9b03
@@ -26125,6 +26170,7 @@ class CombatRoom {
           const _0x538a8f = this.kindOf(_0x34f982, _0x1c04cb.fin);
           (this.hitEnemiesBox(_0x3f4da6, {
             "m": _0x1c04cb.m * _0x298e6d,
+            "melee": true,
             "kind": _0x538a8f,
             "el": _0x1c04cb.el,
             "st": _0x1c04cb.st,
@@ -26469,9 +26515,14 @@ class CombatRoom {
       "h": 30
     }));
   }
+  meleeVisible(enemy) {
+    const x=this.player.cx,y=this.player.cy,dx=enemy.cx-x,dy=enemy.cy-y,steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/4));
+    for(let i=1;i<steps;i++)if(this.world.solidPx(x+dx*i/steps,y+dy*i/steps))return false;
+    return true;
+  }
   hitEnemiesBox(_0x2b1c6b, _0x447b6d) {
     let _0x5166bc = 0;
-    for (const _0x15f325 of this.allEnemies()) _0x15f325.dead || _0x15f325.state === "spawn" || !F0(_0x15f325.b, _0x2b1c6b) || (this.damageEnemy(_0x15f325, _0x447b6d), _0x5166bc++);
+    for (const _0x15f325 of this.allEnemies()) _0x15f325.dead || _0x15f325.state === "spawn" || !F0(_0x15f325.b, _0x2b1c6b) || _0x447b6d.melee&&!this.meleeVisible(_0x15f325) || (this.damageEnemy(_0x15f325, _0x447b6d), _0x5166bc++);
     return _0x5166bc;
   }
   breakTiles(_0x1f3b92) {
@@ -27502,6 +27553,7 @@ function Ml(_0x1c0573) {
   };
   for (const _0x1d67d6 of BOSSES) _0xd9289[_0x1d67d6.id] && _0x26fb01(_0xd9289[_0x1d67d6.id], (_0x1c0573.stats.bossKills[_0x1d67d6.id] ?? 0) > 0);
   for (const _0x39123d of BOOKS) _0x39123d.ready && _0x39123d.stories.length && _0x26fb01("book" + _0x39123d.id, !!_0x1c0573.storyClear[_0x39123d.stories[_0x39123d.stories.length - 1]]);
+  _0x1c0573.heroRarities=Object.fromEntries(Object.keys(_0x1c0573.chars).map(id=>[id,CHARACTERS[id]?.rarity]));
   for (const [id,, ,condition] of EXTRA_MILESTONES) _0x26fb01(id, condition(_0x1c0573));
   return (_0x26fb01("story2", !!_0x1c0573.storyClear[2]), _0x26fb01("story3", !!_0x1c0573.storyClear[3]), _0x26fb01("story4", !!_0x1c0573.storyClear[4]), _0x288c2d);
 }
@@ -29095,16 +29147,15 @@ class GameHud {
       const _0x5da40f = _0x13af64.hp / _0x13af64.maxHp;
       (this.bossGhost += (_0x5da40f - this.bossGhost) * 0.04, this.bossGhost < _0x5da40f && (this.bossGhost = _0x5da40f));
       const _0x2e91ea = 180, _0x5af105 = 164;
-      if ((_0x25b1f7.save(), _0x3c79b8 && (_0x25b1f7.globalAlpha *= 0.3), _0x25b1f7.fillStyle = "rgba(10,4,12,0.75)", _0x25b1f7.fillRect(_0x2e91ea - 4, 3, _0x5af105 + 8, 26), drawText(_0x25b1f7, "" + _0x13af64.bd.name, _0x2e91ea + _0x5af105 / 2, 4, {
-        "size": 8,
-        "align": "center",
-        "color": "#ffd0e0",
-        "bold": !0
-      }), _0x13af64.bd.segBar)) _2(_0x25b1f7, _0x13af64, _0x2e91ea, _0x5af105, _0x29cf7e.time); else {
-        drawBar(_0x25b1f7, _0x2e91ea, 16, _0x5af105, 5, _0x5da40f, "#d02050", "#200810", this.bossGhost);
-        for (const _0x25433d of _0x13af64.bd.phases) (_0x25b1f7.fillStyle = "#ffffff", _0x25b1f7.fillRect(_0x2e91ea + _0x5af105 * _0x25433d, 15, 1, 7));
-      }
-      (drawText(_0x25b1f7, _0x13af64.bd.title, _0x2e91ea + _0x5af105 / 2, 22, {
+      _0x25b1f7.save();if(_0x3c79b8)_0x25b1f7.globalAlpha*=.3;
+      _0x25b1f7.fillStyle='rgba(10,4,12,.9)';_0x25b1f7.fillRect(_0x2e91ea-5,2,_0x5af105+10,34);
+      drawText(_0x25b1f7,_0x13af64.bd.name,_0x2e91ea+_0x5af105/2,4,{size:8,align:'center',color:'#ffd0e0',bold:true});
+      drawBar(_0x25b1f7,_0x2e91ea,18,_0x5af105,6,_0x5da40f,'#d02050','#200810',this.bossGhost);
+      for(const mark of _0x13af64.bd.phases){_0x25b1f7.fillStyle='#ffe7a0';_0x25b1f7.fillRect(_0x2e91ea+_0x5af105*mark,17,1,8);}
+      const phaseInfo=phaseProgress(_0x13af64);
+      drawText(_0x25b1f7,Math.ceil(_0x13af64.hp).toLocaleString()+' / '+_0x13af64.maxHp.toLocaleString()+' · '+Math.ceil(_0x5da40f*100)+'%',_0x2e91ea+_0x5af105/2,12,{size:6,align:'center',color:'#ffffff'});
+      drawText(_0x25b1f7,'단계 '+phaseInfo.phase+'/'+phaseInfo.total+' · '+(phaseInfo.next?'다음 단계까지 ':'격파까지 ')+phaseInfo.remaining.toLocaleString(),_0x2e91ea+_0x5af105/2,27,{size:6,align:'center',color:'#ffe0a0'});
+      (drawText(_0x25b1f7, "", _0x2e91ea + _0x5af105 / 2, 22, {
         "size": 5,
         "align": "center",
         "color": "#a090b0"
@@ -33446,6 +33497,8 @@ class SettingsScene {
       "label": "저장 데이터 초기화",
       "col": "#ff6080"
     }, {
+      "label": "계정 영구 삭제", "col":"#ff5060"
+    }, {
       "label": developerService.authorized ? "개발자 도구 · 확률/계정/쿠폰" : "돌아가기"
     }, ...developerService.authorized ? [{label:"돌아가기"}] : []], this.keys.items = [...getStoryGate.map(_0x35675f => ({
       "label": "" + formatBookStory[_0x35675f]
@@ -33507,12 +33560,24 @@ class SettingsScene {
     const _0x18106a = this.main.sel;
     _0x18106a <= 4 && (_0x9e2fa6.menu("mleft") && this.adjust(_0x18106a, -1), _0x9e2fa6.menu("mright") && this.adjust(_0x18106a, 1));
     const _0x3b47f5 = this.main.update(_0x9e2fa6);
-    if (_0x3b47f5 === "ok" && _0x18106a===10 && developerService.authorized) {developerConsole.open();return;}
-    if (_0x3b47f5 === "back" || _0x3b47f5 === "ok" && _0x18106a === (developerService.authorized?11:10)) {
+    if (_0x3b47f5 === "ok" && _0x18106a===10) {this.openDelete();return;}
+    if (_0x3b47f5 === "ok" && _0x18106a===11 && developerService.authorized) {developerConsole.open();return;}
+    if (_0x3b47f5 === "back" || _0x3b47f5 === "ok" && _0x18106a === (developerService.authorized?12:11)) {
       (game.persist(), game.go(this.back, !1));
       return;
     }
     _0x3b47f5 === "ok" && (_0x18106a <= 4 && this.adjust(_0x18106a, 1), _0x18106a === 5 && (this.mode = "keys"), _0x18106a === 6 && this.openDom(), _0x18106a === 7 && this.openRestore(), _0x18106a === 8 && this.openCoupon(), _0x18106a === 9 && (this.mode = "reset", this.confirm.sel = 1));
+  }
+  openDelete() {
+    this.closeDom();this.mode='io';
+    const root=document.createElement('div');root.className='pact-auth';root.style.zIndex=110;
+    root.innerHTML='<h3>계정 영구 삭제</h3><p>현재 계정의 영웅·재화·저장 기록·랭킹·서버 로그·개발자 권한을 삭제합니다. 복구할 수 없습니다.</p><p>게임 진행 초기화만 하려면 취소하세요.</p><form><label>현재 비밀번호<input type="password" name="password" autocomplete="current-password" required></label><label>확인 문구<input name="confirm" placeholder="영구삭제" required></label><p role="status"></p><button type="submit">내 계정 영구 삭제</button><button type="button" data-cancel>취소</button></form>';
+    root.querySelector('[data-cancel]').onclick=()=>this.closeDom();
+    root.querySelector('form').onsubmit=async event=>{event.preventDefault();const status=root.querySelector('[role="status"]'),button=root.querySelector('[type="submit"]');if(root.querySelector('[name="confirm"]').value!=='영구삭제'){status.textContent='확인 문구로 영구삭제를 입력하세요';return;}
+      button.disabled=true;status.textContent='인증 및 서버 기록 삭제 중…';
+      try{await accountStore.permanentlyDelete(root.querySelector('[name="password"]').value,()=>{status.textContent='서버 기록 정리 중… 창을 닫지 마세요.';});developerService.clear();ns.reset();this.closeDom();game.login(null);game.go(new LoginScene(),false);game.toast('계정과 랭킹 기록을 영구 삭제했습니다');}
+      catch(error){status.textContent=error.message;button.disabled=false;}
+    };this.dom=root;document.body.append(root);
   }
   openDom() {
     this.mode = "io";
@@ -33635,7 +33700,7 @@ class SettingsScene {
       }), Xe(_0x3b32e9, [["↑↓", "선택"], ["Enter", "변경"], ["Esc", "돌아가기"]], 260));
       return;
     }
-    (this.main.render(_0x3b32e9, 120, 30, 240, 17, 2.5, 8), this.mode === "reset" && (ye(_0x3b32e9, 120, 100, 240, 70, {
+    (this.main.render(_0x3b32e9, 120, 30, 240, 15, 2, 8), this.mode === "reset" && (ye(_0x3b32e9, 120, 100, 240, 70, {
       "border": "#ff4060"
     }), drawText(_0x3b32e9, "모든 진행(영웅·무기·재화)이 사라집니다. 정말 초기화할까요?", 240, 112, {
       "size": 7,
@@ -34284,7 +34349,7 @@ class RunScene {
         break;
       case "chest":
         {
-          const _0x13681f = _0x13d5fb.label === "big", _0x4a3028 = Math.round((_0x13681f ? 80 : 30 + Math.random() * 30) * (1 + _0x2375a1.chapter * 0.3));
+          const _0x13681f = _0x13d5fb.label === "big", _0x4a3028 = Math.round((_0x13681f ? 45 : 20 + Math.random() * 20) * (1 + _0x2375a1.chapter * 0.3));
           (_0x5695ee.dropReward("gold", _0x13d5fb.x, _0x13d5fb.y - 12, _0x4a3028, 10), _0x5695ee.dropReward("stone", _0x13d5fb.x, _0x13d5fb.y - 12, _0x13681f ? 15 : 10, 3), _0x13681f ? this.relicChoice(3, "보물 상자") : (Math.random() < 0.45 || _0x13d5fb.hidden === !1) && _0x5695ee.dropReward("relicOrb", _0x13d5fb.x, _0x13d5fb.y - 20, 1, 1), this.checkpoint());
           break;
         }
@@ -34344,7 +34409,7 @@ class RunScene {
         const _0x4b63c9 = data_s0[_0x28828a];
         (game.toast("유물 강화: " + _0x4b63c9.name + " Lv" + relicLevel(this.run.relics,_0x28828a), zs[_0x4b63c9.rarity]), this.run.relics.filter(_0x597d72 => data_s0[_0x597d72]).length >= 10 && Na(game.save, "relic10") && game.achToast(["relic10"]), this.room.build.crests.some(_0x320620 => _0x320620.tier >= 3) && Na(game.save, "crest6") && game.achToast(["crest6"]));
         const _0x2688ee = this.room.build.sets.find(_0x4a4d00 => data_Ir[_0x4a4d00.id].pieces.includes(_0x28828a));
-        if (_0x2688ee && _0x2688ee.tier > 0 && data_Ir[_0x2688ee.id].tiers[_0x2688ee.tier - 1].n === _0x2688ee.count) {
+        if (relicLevel(this.run.relics,_0x28828a)===1 && _0x2688ee && _0x2688ee.tier > 0 && data_Ir[_0x2688ee.id].tiers[_0x2688ee.tier - 1].n === _0x2688ee.count) {
           const _0x1c068c = data_Ir[_0x2688ee.id];
           game.toast("세트 「" + _0x1c068c.name + "」 " + _0x2688ee.count + "개 발동: " + _0x1c068c.tiers[_0x2688ee.tier - 1].desc, _0x1c068c.col);
         }
@@ -34928,7 +34993,7 @@ class TitleScene {
       const _0x742a9d = getBook(this.bookView), _0xb8609f = BOOKS.findIndex(_0x1c7156 => _0x1c7156.id === _0x742a9d.id);
       (_0x511644.save(), _0x511644.globalAlpha = _0xe8c564, _0x511644.fillStyle = "rgba(0,0,0,0.55)");
       const _0x499463 = _0x742a9d.ready && !data_va(game.save, _0x742a9d.id);
-      (_0x511644.fillRect(150, 12, 180, _0x499463 || !_0x742a9d.ready ? 21 : 18), _0x511644.restore(), drawText(_0x511644, _0x742a9d.name + " 「" + _0x742a9d.title + "」", 240, _0x499463 || !_0x742a9d.ready ? 13 : 16, {
+      (_0x511644.fillRect(150, 12, 180, _0x499463 || !_0x742a9d.ready ? 21 : 18), _0x511644.restore(), drawText(_0x511644, "제" + _0x742a9d.id + "권 " + _0x742a9d.name, 240, _0x499463 || !_0x742a9d.ready ? 13 : 16, {
         "size": 9,
         "align": "center",
         "color": _0x742a9d.ready && !_0x499463 ? "#ffe0a0" : "#8a8098",
@@ -34958,21 +35023,21 @@ class TitleScene {
       };
       (_0x1a7b7e("book:prev", 160, _0xb8609f > 0, "◀"), _0x1a7b7e("book:next", 320, _0xb8609f < BOOKS.length - 1, "▶"));
     }
-    (_0x511644.save(), _0x511644.globalAlpha = _0xe8c564, _0x511644.fillStyle = "rgba(0,0,0,0.5)", _0x511644.fillRect(0, 34, 480, 64), _0x511644.restore(), drawText(_0x511644, "Soul collecter", 241, 40, {
+    (_0x511644.save(), _0x511644.globalAlpha = _0xe8c564, _0x511644.fillStyle = "rgba(0,0,0,0.5)", _0x511644.fillRect(0, 34, 480, 64), _0x511644.restore(), drawText(_0x511644, "잊힌 이름의 서", 241, 40, {
       "size": 30,
       "align": "center",
       "color": "#3a1a10",
       "bold": !0,
       "alpha": _0xe8c564,
       "shadow": null
-    }), drawText(_0x511644, "Soul collecter", 240, 38, {
+    }), drawText(_0x511644, "잊힌 이름의 서", 240, 38, {
       "size": 30,
       "align": "center",
       "color": "#ffd070",
       "bold": !0,
       "alpha": _0xe8c564,
       "shadow": "#5a2a10"
-    }), drawText(_0x511644, "SOUL  COLLECTER", 240, 76, {
+    }), drawText(_0x511644, "BOOK OF FORGOTTEN NAMES", 240, 76, {
       "size": 8,
       "align": "center",
       "color": "#c0a0ff",
@@ -34998,7 +35063,7 @@ class TitleScene {
       (ua(_0x511644, 150 + _0x4fc210 * 94, 144, 86, 20, _0x3ab2ae.label, this.confirm.sel === _0x4fc210, {
         "col": _0x3ab2ae.col
       }), kt.add("tconf:" + _0x4fc210, 150 + _0x4fc210 * 94, 144, 86, 20));
-    })), Xe(_0x511644, [["W/S · ↑↓", "선택"], ["←→", "북"], ["Enter / " + game.input.label("attack"), "결정"]], 246), drawText(_0x511644, "v0.4.0 · Soul collecter · 현실 결제 없음", 476, 260, {
+    })), Xe(_0x511644, [["W/S · ↑↓", "선택"], ["←→", "북"], ["Enter / " + game.input.label("attack"), "결정"]], 246), drawText(_0x511644, "v0.7.0 · 잊힌 이름의 서 · 현실 결제 없음", 476, 260, {
       "size": 6,
       "align": "right",
       "color": "#6a6078"
@@ -35148,13 +35213,13 @@ class LoginScene {
     }
   }
   ui(_0x147caa) {
-    (drawText(_0x147caa, "Soul collecter", 240, 22, {
+    (drawText(_0x147caa, "잊힌 이름의 서", 240, 22, {
       "size": 26,
       "align": "center",
       "color": "#ffd070",
       "bold": !0,
       "shadow": "#5a2a10"
-    }), drawText(_0x147caa, "SOUL  COLLECTER", 240, 56, {
+    }), drawText(_0x147caa, "BOOK OF FORGOTTEN NAMES", 240, 56, {
       "size": 7,
       "align": "center",
       "color": "#c0a0ff"

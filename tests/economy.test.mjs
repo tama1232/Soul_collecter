@@ -17,7 +17,7 @@ test('growth prices are monotonic, bounded, and shared with the real game', () =
   assert.equal(data.getWeaponEnhanceCost(7, 49), weaponEnhanceCost(50));
   assert.equal(data.getSkillMasteryCost(7, 49), skillMasteryCost(50));
   const upgrade = permanentUpgrade({ id: 'atk', max: 5, per: 5, cost: [1] });
-  assert.equal(upgrade.max, Infinity); assert.ok(upgradeCost(upgrade,100)>upgradeCost(upgrade,99));
+  assert.equal(upgrade.max, 50); assert.ok(upgradeCost(upgrade,100)>upgradeCost(upgrade,99));
 });
 
 test('boss trials pay every growth resource, retain partial rewards, and never pay a zero-kill farm', () => {

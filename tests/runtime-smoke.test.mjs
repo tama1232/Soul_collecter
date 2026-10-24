@@ -28,7 +28,7 @@ function environment() {
   globalThis.matchMedia = () => ({ matches: false, addEventListener() {} });
   globalThis.requestAnimationFrame = () => 1; globalThis.cancelAnimationFrame = () => {};
   globalThis.Image = class { width = 160; height = 96; set src(value) { this.url = value; queueMicrotask(() => this.onload?.()); } };
-  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'soul-collecter-0.6.1' }), headers: new Headers() });
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'book-of-forgotten-names-0.7.0' }), headers: new Headers() });
   const originalInterval = globalThis.setInterval;
   globalThis.setInterval = (...args) => { const timer = originalInterval(...args); timer.unref(); return timer; };
   globalThis.CONTRACT_CONFIG = { firebase: { apiKey: '', projectId: '' } };
@@ -81,12 +81,12 @@ test('real game modules boot, create an independent local account, save and rend
   const {UpgradeScene}=await import('../src/features/upgrades.js');
   const {CodexScene}=await import('../src/features/codex.js');
   const {LoadoutScene}=await import('../src/features/loadout.js');
-  const upgrade=new UpgradeScene(app.scene);save.upgrades.atk=300;save.crystals=1e100;
+  const upgrade=new UpgradeScene(app.scene);save.upgrades.atk=10;save.crystals=1e100;
   upgrade.sel=data.PERMANENT_UPGRADES.findIndex(def=>def.id==='atk');
   const menu=app.input.menu;app.input.menu=key=>key==='ok';upgrade.update();app.input.menu=menu;
-  assert.equal(save.upgrades.atk,301);upgrade.ui(app.r.d);
+  assert.equal(save.upgrades.atk,10);for(let id=1;id<=7;id++)save.storyClear[id]=true;app.input.menu=key=>key==='ok';upgrade.update();app.input.menu=menu;assert.equal(save.upgrades.atk,11);upgrade.ui(app.r.d);
   const achievements=new AchScene(app.scene);achievements.tab=1;achievements.tsel=data.data_ce.length-1;achievements.ui(app.r.d);
-  assert.ok(achievements.titleTop>0);assert.equal(save.ach.growth300,'done');
+  assert.ok(achievements.titleTop>0);assert.equal(data.ACHIEVEMENTS.some(achievement=>achievement.id==='growth300'),false);
   for(const unlocked of [false,true]) {
     save.eightUnlocked=unlocked;save.compass=100;
     const pull=runtime.runtime_Fd(save,'six',1,false,()=>0);
@@ -169,6 +169,22 @@ test('real game modules boot, create an independent local account, save and rend
   await panel.open();const panelRoot=document.body.children.at(-1),nav=panelRoot.querySelector('nav');assert.equal(nav.children.length,6);
   for(const button of nav.children) await button.onclick();
   panel.close();
+  // Actual animation moves are [frame, vx, vy]. The former frame-as-vx bug
+  // launched characters across a room late in a skill animation.
+  player.startAction('skill1',{dur:100,move:[[0,2,0],[30,-1,-2]],ev:[]});
+  assert.equal(player.b.vx,2*player.facing);player.actF=30;player.applyMoves();assert.equal(player.b.vx,-player.facing);assert.equal(player.b.vy,-2);
+  player.startAction('swap',{dur:20,move:[[0,20,0]],ev:[]});assert.equal(player.b.vx,0);
+  player.startAction('skill1',{dur:30,ev:[]});assert.equal(player.canDash(),false);assert.equal(player.canSwap(),false);player.endAct();
+  // Every hero receives simultaneous attack/skill/swap/dash inputs in real rooms.
+  for(const hero of data.CHARACTER_LIST){
+    const stressSave=data.createSave();stressSave.chars[hero.id]={lv:10,aw:0,count:1,sk:[10,10,10,10]};stressSave.loadout.chars=[hero.id,'kael'];
+    const stressScene=new RunScene(new data.RunState(stressSave,84));stressScene.enter();const stressRoom=stressScene.room;stressRoom.god=true;
+    for(let tick=0;tick<180;tick++){stressRoom.time++;stressRoom.input={right:tick%60<30,left:tick%60>=30,atk:true,atkP:true,s1P:true,s2P:true,ultP:true,swapP:true,dashP:true,jumpP:tick%23===0};stressRoom.step();assert.ok(Number.isFinite(stressRoom.player.b.x)&&Number.isFinite(stressRoom.player.b.vx),hero.id);assert.ok(Math.abs(stressRoom.player.b.vx)<=12,hero.id);}
+  }
+  // Later books add a distinct, warned phase mechanic; all pulses finish.
+  for(const book of [2,3,4]){room.run.book=book;room.run.story=book*7;room.run.bossRush=false;boss.startMemoryEcho(room);assert.ok(boss.memoryEcho);for(let tick=0;tick<225;tick++)if(boss.memoryEcho)boss.updateMemoryEcho(room);assert.equal(boss.memoryEcho,null);}
+  // Permanent deletion of a disposable local test identity preserves the first account.
+  await accountStore.signUp('deleteqa','test-pass-123');await accountStore.permanentlyDelete('test-pass-123');assert.equal(accountStore.localAccounts().deleteqa,undefined);assert.ok(accountStore.localAccounts().qatester);
   app.loop.stop();
 
 });

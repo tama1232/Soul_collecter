@@ -31,10 +31,10 @@ test('normal and compass base probabilities exactly match locked and unlocked po
   assert.equal(data.data_Lr(pool,save.pity.char,()=>0,1)[0].id,'anima');
 });
 
-test('all 55 existing heroes retain exact original combat data; only one 8-star is added',async()=>{
+test('existing heroes retain combat data except two requested six-star ultimates',async()=>{
   const baseline=JSON.parse(await readFile(new URL('./fixtures/original-heroes.json',import.meta.url)));
   assert.equal(Object.keys(baseline).length,55);
-  for(const [id,hash] of Object.entries(baseline)) assert.equal(createHash('sha256').update(JSON.stringify(data.CHARACTERS[id])).digest('hex'),hash,id);
+  for(const [id,hash] of Object.entries(baseline)){const hero=structuredClone(data.CHARACTERS[id]);if(['enoch','flora'].includes(id)){assert.ok(hero.ult?.act.ev.length);delete hero.ult;}assert.equal(createHash('sha256').update(JSON.stringify(hero)).digest('hex'),hash,id);}
   const eight=data.CHARACTER_LIST.filter(hero=>hero.rarity===8);
   assert.equal(eight.length,1); assert.equal(eight[0].crests.length,10);
   assert.ok(eight[0].combo.some(act=>act.ev.some(event=>event.k==='hit')));
@@ -85,20 +85,11 @@ test('boss routes repeat forever, accelerate each cycle and pay faster growing r
   assert.equal(hiddenBossChance(0),.00001);assert.equal(hiddenBossChance(99),.001);assert.equal(hiddenBossChance(999999),1);
 });
 
-test('common upgrades have no gameplay cap and increasingly geometric prices; migration keeps them',()=>{
-  const save=data.createSave();
-  for(const id of ['hp','atk','skill']) {
-    const def=data.PERMANENT_UPGRADES.find(upgrade=>upgrade.id===id);
-    assert.equal(def.max,Infinity);assert.equal(def.cost.length,0);
-    assert.ok(upgradeCost(def,300)>upgradeCost(def,100));
-    assert.ok(upgradeCost(def,200)/upgradeCost(def,199)>upgradeCost(def,40)/upgradeCost(def,39));
-    save.upgrades[id]=301;
-    assert.equal(data.normalizeSave(save).upgrades[id],301);
-    assert.equal(data.data_fe(save.upgrades,id),301*def.per);
-  }
-  const oldRun={v:1,data:{tower:true,nodes:[],party:[],cur:0},rngEntry:1,room:{}};
-  save.run=oldRun;assert.equal(data.normalizeSave(save).run,null);
-  assert.throws(()=>new data.RunState(save,4).startTower(),/제거/);
+test('legacy uncapped common upgrades are refunded once and obey whole-book caps',()=>{
+ const save=data.createSave();save.crystals=0;
+ for(const id of ['hp','atk','skill']){const def=data.PERMANENT_UPGRADES.find(upgrade=>upgrade.id===id);assert.equal(def.max,50);save.upgrades[id]=30;}
+ const normalized=data.normalizeSave(save);for(const id of ['hp','atk','skill'])assert.equal(normalized.upgrades[id],10);
+ assert.ok(normalized.crystals>0);assert.equal(data.normalizeSave(normalized).crystals,normalized.crystals);
 });
 
 test('party and collection bonds scale with rarity and breakthroughs',()=>{

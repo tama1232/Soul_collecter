@@ -33,14 +33,14 @@ class S {
       return;
     }
     const _0x5f2bf5 = ACHIEVEMENTS.length;
-    (_0x159236.menu("mup") && (this.sel = (this.sel - 1 + _0x5f2bf5) % _0x5f2bf5), _0x159236.menu("mdown") && (this.sel = (this.sel + 1) % _0x5f2bf5), this.sel < this.scroll && (this.scroll = this.sel), this.sel >= this.scroll + 10 && (this.scroll = this.sel - 9));
+    (_0x159236.menu("mup") && (this.sel = (this.sel - 1 + _0x5f2bf5) % _0x5f2bf5), _0x159236.menu("mdown") && (this.sel = (this.sel + 1) % _0x5f2bf5), this.sel < this.scroll && (this.scroll = this.sel), this.sel >= this.scroll + 9 && (this.scroll = this.sel - 8));
     const _0x4dd892 = runtime_kt.hover();
     let _0xd5060b = !1;
     if ((_0x4dd892?.startsWith("ac:") && (runtime_kt.mouse.moved && (this.sel = Number(_0x4dd892.slice(3))), runtime_kt.mouse.click && (this.sel = Number(_0x4dd892.slice(3)), _0xd5060b = !0)), _0x159236.menu("ok") || _0xd5060b)) {
       const _0x5cbcfb = ACHIEVEMENTS[this.sel];
       game.save.ach[_0x5cbcfb.id] === "done" ? (game.save.ach[_0x5cbcfb.id] = "claimed", game.save.stones += _0x5cbcfb.reward, _0x5cbcfb.compass && (game.save.compass = (game.save.compass ?? 0) + _0x5cbcfb.compass), runtime_w.play("gem"), game.toast([_0x5cbcfb.reward ? "영혼석 +" + _0x5cbcfb.reward : "", _0x5cbcfb.compass ? "별의 나침반 +" + _0x5cbcfb.compass : ""].filter(Boolean).join(" · "), "#9ec0ff"), game.persist()) : runtime_w.play("error");
     }
-    if (_0x159236.pressed("ult")) {
+    if (_0x159236.pressed("ult") || runtime_kt.hover()==='claim-all'&&runtime_kt.mouse.click) {
       let _0x1846dd = 0, _0x355c4c = 0;
       for (const _0x45448c of ACHIEVEMENTS) game.save.ach[_0x45448c.id] === "done" && (game.save.ach[_0x45448c.id] = "claimed", _0x1846dd += _0x45448c.reward, _0x355c4c += _0x45448c.compass ?? 0);
       (_0x1846dd || _0x355c4c) && (game.save.stones += _0x1846dd, game.save.compass = (game.save.compass ?? 0) + _0x355c4c, runtime_w.play("gem"), game.toast([_0x1846dd ? "영혼석 +" + _0x1846dd : "", _0x355c4c ? "별의 나침반 +" + _0x355c4c : ""].filter(Boolean).join(" · "), "#9ec0ff"), game.persist());
@@ -117,7 +117,7 @@ class S {
       this.uiTitles(_0x255258);
       return;
     }
-    (runtime_ye(_0x255258, 8, 28, 464, 224), ACHIEVEMENTS.slice(this.scroll, this.scroll + 10).forEach((_0x1b4a30, _0x53a7a7) => {
+    (runtime_ye(_0x255258, 8, 28, 464, 224), ACHIEVEMENTS.slice(this.scroll, this.scroll + 9).forEach((_0x1b4a30, _0x53a7a7) => {
       const _0x42423d = _0x53a7a7 + this.scroll, _0xc89b53 = _0x3fff95.ach[_0x1b4a30.id], _0x3732f2 = 34 + _0x53a7a7 * 21, _0x1a5119 = _0x42423d === this.sel;
       (_0x255258.fillStyle = _0x1a5119 ? "rgba(255,224,128,0.2)" : "rgba(255,255,255,0.03)", _0x255258.fillRect(14, _0x3732f2, 452, 19), runtime_kt.add("ac:" + _0x42423d, 14, _0x3732f2, 452, 19), runtime_de(_0x255258, _0xc89b53 ? "star" : "lock", 18, _0x3732f2 + 4, 11, _0xc89b53 === "claimed" ? "#8a8098" : _0xc89b53 ? "#ffe080" : "#4a4058"), drawText(_0x255258, hiddenAchievement(_0x3fff95,_0x1b4a30.id)?"???":_0x1b4a30.name, 34, _0x3732f2 + 5, {
         "size": 8,
@@ -125,14 +125,14 @@ class S {
         "bold": _0x1a5119
       }), drawText(_0x255258, hiddenAchievement(_0x3fff95,_0x1b4a30.id)?"???":_0x1b4a30.desc, 140, _0x3732f2 + 5, {
         "size": 7,
-        "color": "#a8a0c0"
+        "color": "#a8a0c0", "maxW":200
       }), drawText(_0x255258, _0xc89b53 === "claimed" ? "수령 완료" : (_0xc89b53 === "done" ? "수령 ▶ " : "") + [_0x1b4a30.reward ? "영혼석 " + _0x1b4a30.reward : "", _0x1b4a30.compass ? "별의 나침반 " + _0x1b4a30.compass : ""].filter(Boolean).join(" + "), 460, _0x3732f2 + 5, {
         "size": 7,
         "align": "right",
         "color": _0xc89b53 === "done" ? "#ffe080" : "#6a6078",
         "bold": _0xc89b53 === "done"
       }));
-    }), runtime_Xe(_0x255258, [["↑↓", "선택"], [game.input.label("attack"), "수령"], [game.input.label("ult"), "모두 수령"], [game.input.label("skill1"), "칭호 →"], ["Esc", "나가기"]], 258));
+    }), drawText(_0x255258,'[ 모두 받기 ]',412,242,{size:8,color:'#a4ffd4',align:'center'}), runtime_kt.add('claim-all',366,236,96,16), runtime_Xe(_0x255258, [["↑↓", "선택"], [game.input.label("attack"), "수령"], [game.input.label("ult"), "모두 수령"], [game.input.label("skill1"), "칭호 →"], ["Esc", "나가기"]], 258));
   }
 }
 export {S as AchScene};

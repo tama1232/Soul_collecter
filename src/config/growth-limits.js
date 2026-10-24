@@ -8,7 +8,7 @@ export function growthNotice(save) {
  save.growthNoticeCap=cap;
  const refund=save.growthRefundPending??0;delete save.growthRefundPending;
  if(refund>0) return '성장 상한 조정: 영혼 결정 '+refund.toLocaleString()+' 환급 · 현재 최대 Lv.'+cap;
- return cap>old?'성장 상한 확장! 캐릭터·스킬 최대 Lv.'+old+' → '+cap:null;
+ return cap>old?'성장 상한 확장! 캐릭터·스킬·공용 강화 최대 '+old+' → '+cap:null;
 }
 export function migrateGrowth(save) {
  if(save.growthVersion===1) return;

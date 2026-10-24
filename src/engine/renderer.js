@@ -1,3 +1,4 @@
+import {resetTextDetails} from './text-details.js';
 import {pixelViewport} from './render-utils.js';
 const pt=480,wt=270;
 function pa(_0x291348, _0x3937ce) {
@@ -26,6 +27,7 @@ class GameRenderer {
     this.d.imageSmoothingEnabled = false;
   }
   beginFrame() {
+    resetTextDetails();
     (Fe.tilt = 0, Fe.mirror = 1, this.w.setTransform(1, 0, 0, 1, 0, 0), this.w.globalAlpha = 1, this.w.globalCompositeOperation = "source-over", this.w.fillStyle = "#000", this.w.fillRect(0, 0, pt, wt), this.t.setTransform(1, 0, 0, 1, 0, 0), this.t.globalAlpha = 1, this.t.globalCompositeOperation = "source-over", this.t.clearRect(0, 0, pt, wt));
   }
   tiltT(_0x4b2f53) {

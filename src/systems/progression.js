@@ -7,7 +7,7 @@ return function settleRun(save, run, at = now()) {
   const stats = run.stats, bossCount = stats.bosses.length, mats = [0, 0, 0, 0];
   let firstBonus = 0;
   for (const id of stats.bosses) {
-    const drop = run.bossRush || run.tower || run.endless ? null : bossMaterialDrop(id);
+    const drop = run.bossRush ? null : bossMaterialDrop(id);
     if (drop) mats[drop.book - 1] += drop.n;
     save.stats.bossKills[id] = (save.stats.bossKills[id] ?? 0) + 1;
     if (!save.firstClear[id]) {
@@ -25,6 +25,7 @@ return function settleRun(save, run, at = now()) {
     crystalBonus: run.upCrystal
   }) : null;
   const modeRewards = run.endless ? endlessRewards(run.floor, bossCount) : run.tower ? towerRewards(run.towerCleared, bossCount) : null;
+  if((run.endless||run.tower)&&bossCount>0)mats[Math.max(0,Math.min(3,(run.book??1)-1))]+=bossCount;
   const stones = trial?.stones ?? Math.round(stats.stones), crystals = trial?.crystals ?? Math.round(stats.crystals);
   const runStones = trial ? 0 : modeRewards ? modeRewards.stones : Math.round((runRewardRules.base + runRewardRules.perChapter * bossCount) * run.modeMul.stones);
   const bestMap = run.endless ? save.endlessBest ??= {} : run.bossRush ? save.rushBest ??= {} : null;

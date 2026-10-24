@@ -2,10 +2,10 @@ import {MAX_GROWTH_CAP} from './growth-limits.js';
 import {getProbabilities} from './live-rules.js';
 import {cycleMultiplier} from './expansion.js';
 /** Shared deterministic prices and rewards. */
-export const ECONOMY_VERSION = 4;
+export const ECONOMY_VERSION = 5;
 export const ECONOMY = Object.freeze({
   bossTrialLength: 6,
-  bookFactors: [1, 1.5, 2.1, 2.8],
+  bookFactors: [1, 1.5, 2.25, 3.375],
   shardsPerBoss: [8, 12, 16, 22],
   completionBonus: 0.25,
   shardBuy: 50,
@@ -20,30 +20,31 @@ export const weaponEnhanceCost = next => round10(80 + 22 * bounded(next, 1, 50) 
 export const skillMasteryCost = next => {next=bounded(next,1,MAX_GROWTH_CAP);return round10((60+18*next+.9*next**2)*growthIncomeFactor(next));};
 export const awakeningCost = (rarity, current = 0) => Math.ceil((ECONOMY.awakeningBase[rarity] ?? 320) * (1 + bounded(current, 0, 4) * 0.35));
 export function permanentUpgrade(definition, expandedFactor = 3, effectFactor = 0.7) {
-  const uncapped = ['hp','atk','skill'].includes(definition.id);
-  const max = uncapped ? Infinity : definition.max > 1 ? definition.max * expandedFactor : definition.max;
+  const progressive = ['hp','atk','skill'].includes(definition.id);
+  const uncapped=false;
+  const max = progressive ? MAX_GROWTH_CAP : definition.max > 1 ? definition.max * expandedFactor : definition.max;
   const base = definition.max <= 1 ? 3000 : /revive|potion|relic/.test(definition.id) ? 600 : 300;
-  return {...definition, max, uncapped, baseCost:base,
-    cost: uncapped ? [] : Array.from({length:max},(_,index)=>round10(base*1.17**index)),
-    per: uncapped ? definition.per : definition.max > 1 ? Math.round(definition.per*effectFactor*1000)/1000 : definition.per};
+  return {...definition, max, uncapped, progressive, baseCost:base,
+    cost: progressive ? [] : Array.from({length:max},(_,index)=>round10(base*1.17**index)),
+    per: progressive ? definition.per : definition.max > 1 ? Math.round(definition.per*effectFactor*1000)/1000 : definition.per};
 }
 export function upgradeCost(definition, level) {
   // The ratio itself rises with level. Never allocate an unbounded cost array.
-  return definition.uncapped ? round10(definition.baseCost * Math.exp(level*Math.log(1.12) + .00045*level*level)) : definition.cost[level];
+  return definition.progressive ? round10(definition.baseCost * Math.exp(level*Math.log(1.12) + .00045*level*level)) : definition.cost[level];
 }
 export function bossTrialRewards({book=1,bosses=0,cycleLength=6,curse=0,stoneBonus=0,crystalBonus=0}={}) {
   const tier = bounded(book,1,4)-1, count = Math.max(0,Math.floor(bosses));
-  const factor = ECONOMY.bookFactors[tier], length = Math.max(1,cycleLength);
+  const factor = ECONOMY.bookFactors[tier]*(72+(tier+1)*7)/79, length = Math.max(1,cycleLength);
   let crystals=0,stones=0,awShards=0;
   for (let index=0; index<count; index++) {
     const cycle = Math.floor(index/length), position=index%length;
     const reward = cycleMultiplier(cycle,true);
     crystals += (300+30*position)*factor*reward;
     stones += (60+6*position)*factor*reward;
-    awShards += ECONOMY.shardsPerBoss[tier]*reward;
+    awShards += ECONOMY.shardsPerBoss[0]*factor*reward;
   }
   const difficulty=1+bounded(curse,0,10)*.08, mats=[0,0,0,0];
-  mats[tier]=Math.floor(count/2)+Math.floor(count/length);
+  mats[tier]=Math.floor((count/2+Math.floor(count/length))*factor);
   return {stones:Math.round(stones*difficulty*(1+Math.max(0,stoneBonus))),crystals:Math.round(crystals*difficulty*(1+Math.max(0,crystalBonus))),awShards:Math.round(awShards),mats};
 }
 export function isBossTrialUnlocked(save, book, books) {

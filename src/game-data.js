@@ -1,3 +1,4 @@
+import {encounterPower,combatCap,effectiveUpgrades,migrateCommonUpgrades,addMissingUltimates} from './config/story-balance.js';
 import {growthCap,MAX_GROWTH_CAP,migrateGrowth} from './config/growth-limits.js';
 import {WEEKLY_CATEGORIES,updateRecord,makeRankTitles} from './config/ranking-rules.js';
 import {canSelectTitle} from './systems/rank-titles.js';
@@ -31288,10 +31289,9 @@ class Va {
       UcTfz: "boss"
     };
     const _0x29fe12 = _0x2ecd3c;
-    return this.endless ? Pa(this.endlessBase, this.floor) : this.tower ? za(this.floor, this.nodes[this.cur]?.type === _0x29fe12.UcTfz) : this.bossRush ? {
-      "hp": this.storyDef.power.hp * Ce.hp * cycleMultiplier(rushCycle(this.chapter, this.rushList.length)),
-      "atk": this.storyDef.power.atk * Ce.atk * cycleMultiplier(rushCycle(this.chapter, this.rushList.length))
-    } : this.storyDef.power;
+    if(this.endless){const power=encounterPower({story:this.book*7,book:this.book}),factor=Math.min(1e12,1.055**Math.max(0,this.floor-1));power.balance.ref={...power.balance.ref,dps:power.balance.ref.dps*factor,hp:power.balance.ref.hp*factor};return power;}
+    if(this.tower)return za(this.floor,this.nodes[this.cur]?.type==='boss');
+    return encounterPower({story:this.story,book:this.bossRush?this.book:Math.ceil(this.story/7),bossRush:this.bossRush,cycle:this.bossRush?rushCycle(this.chapter,this.rushList.length):0});
   }
   nextThemes() {
     if (this.endless || this.tower) return [this.nextFloorTheme];
@@ -31304,6 +31304,7 @@ class Va {
   startBossRush(_0x2d8eca, _0x26740e = _0x2d8eca.book ?? 1) {
     const save = arguments[0], book = (arguments[1] ?? save.book) ?? 1;
     this.bossRush = true;
+    for(const member of this.party)member.lv=Math.min(member.lv,combatCap(save,{bossRush:true,book}));
     this.eightUnlocked = !!save.eightUnlocked;
     this.tutorial = false;
     this.book = A(book).id;
@@ -31508,11 +31509,11 @@ const _0x263a00 = {
 const f0 = _0x19befa => ze(xe(_0x19befa) - 1), m0 = _0x3c5a66 => xe(_0x3c5a66) + Za - _0x3c5a66, h0 = (_0x53b26a, _0xaf69e2) => "w" + _0x53b26a + "_" + _0xaf69e2, qa = _0x399286 => U(_0x399286).name + " 스토리 " + L(_0x399286), p0 = [_0x27d247, ...B.map(_0x4f2445 => ({
   "key": "endless" + _0x4f2445.id,
   "asc": !1,
-  "label": "무한 모드 " + _0x4f2445.name
+  "label": "무한 " + _0x4f2445.id + "권"
 })), ...B.map(_0x15e5f8 => ({
   "key": "rush" + _0x15e5f8.id,
   "asc": !1,
-  "label": "보스러쉬 " + _0x15e5f8.name
+  "label": "보스러쉬 " + _0x15e5f8.id + "권"
 })), {key:"endless",asc:false,label:"무한 주간 종합"}, {key:"rush",asc:false,label:"보스러쉬 주간 종합"}, {key:"crystals",asc:false,label:"영혼 결정 (최고 보유)"}, _0x263a00, ...E.map(_0x2531f4 => ({
   "key": "time" + _0x2531f4.id,
   "asc": !0,
@@ -38558,7 +38559,7 @@ function z0(_0x4610df) {
     "pickupOverride": br(_0x2f3d58.pickupOverride)
   };
   for (const _0x50d74a of [_0x2954a7.yGHpN, "crystals", "awShards", "compass", "curse", "curseMax", "pickupIndex", "themeIndex", "runsSinceRotation", _0x2954a7.hNTdp, _0x2954a7.Qkmpe, _0x2954a7.hVgbg]) (typeof _0x54510e[_0x50d74a] != "number" || !Number.isFinite(_0x54510e[_0x50d74a])) && (_0x54510e[_0x50d74a] = _0x190aac[_0x50d74a]);
-  return (_0x54510e.storyMax = Math.max(1, Math.min(E.length, Math.floor(_0x54510e.storyMax))), _0x54510e.story = Math.max(1, Math.min(_0x54510e.storyMax, Math.floor(_0x54510e.story))), va(_0x54510e, Math.floor(_0x54510e.book)) || (_0x54510e.book = 1), bt(_0x54510e), pr(_0x54510e), migrateGrowth(_0x54510e), _0x54510e);
+  return (_0x54510e.storyMax = Math.max(1, Math.min(E.length, Math.floor(_0x54510e.storyMax))), _0x54510e.story = Math.max(1, Math.min(_0x54510e.storyMax, Math.floor(_0x54510e.story))), va(_0x54510e, Math.floor(_0x54510e.book)) || (_0x54510e.book = 1), bt(_0x54510e), pr(_0x54510e), migrateGrowth(_0x54510e), migrateCommonUpgrades(_0x54510e), _0x54510e);
 }
 function L0(level) {
   return heroLevelCost(level);
@@ -40048,11 +40049,12 @@ function Q0(_0x5ce381) {
 function J0(_0x3edd9a) {
   return Se.filter(_0x374919 => _0x374919.heroes.includes(_0x3edd9a));
 }
+addMissingUltimates(T);
 qr.push(...EXTRA_MILESTONES.map(([id,name,desc]) => ({id,name,desc,reward:160})));
 ce.splice(0,ce.length,...ce.filter(title => !title.id.startsWith('tower')));
 ce.push(...EXTRA_MILESTONES.map(([id,name,desc,cond],index) => ({id:'title_'+id,no:100+index,name,col:'#ffe2a0',desc,cond})));
 for(const category of p0) {if(category.key==='endless') category.label='무한 종합';if(category.key==='rush') category.label='보스러쉬 종합';}
-ce.push(...makeRankTitles(p0));
+ce.push(...makeRankTitles(p0.filter(category=>!category.key.startsWith('time'))));
 Object.assign(Sr,Object.fromEntries(ce.map(title=>[title.id,title])));
 Object.assign(I0,Object.fromEntries(ce.map(title=>[title.no,title])));
 const eo = ["잿빛 정수", "핏빛 정수", "잉크 정수", "백지 정수"], so = ["#e0c890", "#ff6070", "#b080ff", "#f0f0ff"];

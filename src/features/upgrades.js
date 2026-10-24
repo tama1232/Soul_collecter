@@ -1,3 +1,4 @@
+import {upgradeLimit} from '../config/story-balance.js';
 import {upgradeCost} from '../config/economy.js';
 // Reconstructed from the public 2026-10-23 distribution; see docs/PROVENANCE.md.
 import {game, runtime_kt, runtime_w, drawText, runtime_de, runtime_ye, runtime_Xe, runtime_ua} from "../game.js";
@@ -53,7 +54,7 @@ class _ {
     let _0xa4595d = !1;
     if ((_0x11bb9c?.startsWith("up:") && (runtime_kt.mouse.moved && (this.sel = Number(_0x11bb9c.slice(3))), runtime_kt.mouse.click && (this.sel = Number(_0x11bb9c.slice(3)), _0xa4595d = !0)), _0x1bf162.menu("ok") || _0xa4595d)) {
       const _0x362392 = PERMANENT_UPGRADES[this.sel], _0x28e837 = game.save.upgrades[_0x362392.id] ?? 0;
-      if (_0x28e837 >= _0x362392.max) {
+      if (_0x28e837 >= upgradeLimit(_0x362392,game.save)) {
         runtime_w.play("error");
         return;
       }
@@ -82,7 +83,7 @@ class _ {
   }
   ui(_0x591a3e) {
     const _0x5767e2 = game.save;
-    if ((drawText(_0x591a3e, "영구 강화 — 사자의 대장간", 12, 8, {
+    if ((drawText(_0x591a3e, "영구 강화 — 기억의 대장간", 12, 8, {
       "size": 12,
       "color": "#ffb060",
       "bold": !0
@@ -118,13 +119,13 @@ class _ {
         "size": 7,
         "color": _0x4b577f ? "#ffe080" : "#8a8098"
       }));
-      (drawText(_0x591a3e, _0x1d846c.uncapped ? "Lv" + _0x4b577f : _0x4b577f + "/" + _0x1d846c.max, 410, _0x298739 + (_0x1d17e5 - 9) / 2 + 1, {
+      (drawText(_0x591a3e, _0x4b577f + "/" + upgradeLimit(_0x1d846c,game.save), 410, _0x298739 + (_0x1d17e5 - 9) / 2 + 1, {
         "size": 6,
         "color": _0x4b577f ? "#ffd0a0" : "#6a6078"
-      }), drawText(_0x591a3e, _0x4b577f >= _0x1d846c.max ? "완료" : upgradeCost(_0x1d846c,_0x4b577f).toLocaleString("ko-KR",{notation:"compact",maximumFractionDigits:1}), 460, _0x298739 + (_0x1d17e5 - 9) / 2, {
+      }), drawText(_0x591a3e, _0x4b577f >= upgradeLimit(_0x1d846c,game.save) ? "완료" : upgradeCost(_0x1d846c,_0x4b577f).toLocaleString("ko-KR",{notation:"compact",maximumFractionDigits:1}), 460, _0x298739 + (_0x1d17e5 - 9) / 2, {
         "size": 7,
         "align": "right",
-        "color": _0x4b577f >= _0x1d846c.max ? "#80ff80" : _0x5767e2.crystals >= upgradeCost(_0x1d846c,_0x4b577f) ? "#a0f0ff" : "#806070"
+        "color": _0x4b577f >= upgradeLimit(_0x1d846c,game.save) ? "#80ff80" : _0x5767e2.crystals >= upgradeCost(_0x1d846c,_0x4b577f) ? "#a0f0ff" : "#806070"
       }));
     }), PERMANENT_UPGRADES.length > h && (_0x591a3e.fillStyle = "rgba(255,255,255,0.08)", _0x591a3e.fillRect(468, 34, 2, h * 21 - 2), _0x591a3e.fillStyle = "#ffb060", _0x591a3e.fillRect(468, 34 + this.top / PERMANENT_UPGRADES.length * (h * 21 - 2), 2, h / PERMANENT_UPGRADES.length * (h * 21 - 2)), this.top > 0 && drawText(_0x591a3e, "▲", 240, 28, {
       "size": 6,

@@ -30,7 +30,7 @@ export async function settleWeekly(db,at) {
  const season=db.doc('rankTitleSeasons/'+currentWeek),current=db.doc('rankTitles/current');
  if(!(await season.get()).exists) {
    const holders={};
-   for(const category of ALL_TIME_CATEGORIES) holders[category]=(await leaders(category)).map(row=>row.key);
+   for(const category of ALL_TIME_CATEGORIES.filter(key=>!key.startsWith('time'))) holders[category]=(await leaders(category)).map(row=>row.key);
    await db.runTransaction(async tx=>{
      const [old,active]=await Promise.all([tx.get(season),tx.get(current)]);
      if(old.exists) return;

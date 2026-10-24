@@ -1,3 +1,4 @@
+import {textDetail} from '../engine/text-details.js';
 import {eightContentVisible} from '../config/expansion.js';
 import {bondMultiplier, collectionBonds} from '../config/expansion.js';
 // Reconstructed from the public 2026-10-23 distribution; see docs/PROVENANCE.md.
@@ -247,14 +248,12 @@ class Ps {
     }, 8));
     let _0x5d89cd = 164;
     const _0x1db846 = [["기본 공격 (" + _0x5259c4.combo.length + "타 콤보)", _0x5259c4.combo.length + "타 콤보 · 공중 공격 · 대시 공격"], ["[스킬1] " + _0x5259c4.skills[0].name + " (" + _0x5259c4.skills[0].cd + "초)", _0x5259c4.skills[0].desc], ["[스킬2] " + _0x5259c4.skills[1].name + " (" + _0x5259c4.skills[1].cd + "초)", _0x5259c4.skills[1].desc], ..._0x5259c4.ult ? [["[궁극기 " + game.input.label("ult") + "] " + _0x5259c4.ult.name + " (" + _0x5259c4.ult.cd + "초)", _0x5259c4.ult.desc]] : [], [_0x5259c4.swap.name, _0x5259c4.swap.desc], ["[패시브] " + _0x5259c4.passive.name, _0x5259c4.passive.desc]], _0x2f84f4 = _0x1db846.length > 5 ? 15 : 18;
-    for (const [_0x30d2e3, _0x5a999e] of _0x1db846) (drawText(_0x1885ec, _0x30d2e3, 206, _0x5d89cd, {
-      "size": 6,
-      "color": _0x30d2e3.startsWith("[궁극기") ? "#ff9ae0" : "#ffe080"
-    }), drawText(_0x1885ec, _0x5a999e, 206, _0x5d89cd + 8, {
-      "size": 6,
-      "color": "#c8c0d8",
-      "maxW": 150
-    }), _0x5d89cd += _0x2f84f4);
+    for(const [name,description] of _0x1db846){
+      _0x1885ec.fillStyle='rgba(210,180,110,.10)';_0x1885ec.fillRect(204,_0x5d89cd-2,151,13);
+      drawText(_0x1885ec,name,208,_0x5d89cd,{size:7,color:'#ffe0a0',maxW:143});
+      textDetail(name+'\n\n'+description+'\n\n다른 곳을 누르거나 Esc로 닫기',204,_0x5d89cd-2,151,13);
+      _0x5d89cd+=14;
+    }
     (drawText(_0x1885ec, "각성", 362, 164, {
       "size": 7,
       "color": "#e0d0ff",

@@ -34,7 +34,7 @@ test('new upgrades stop at account cap and prices follow later-book income facto
  assert.equal(data__0(save,'kael',0),true);assert.equal(data__0(save,'kael',0),false);
  for(let id=1;id<=7;id++)save.storyClear[id]=true;
  const before=save.crystals;assert.equal(data__0(save,'kael',0),true);assert.equal(before-save.crystals,skillMasteryCost(11));
- for(const [level,factor] of [[10,1],[11,1.5],[21,2.1],[31,2.8],[41,2.8]]){
+ for(const [level,factor] of [[10,1],[11,1.5],[21,2.25],[31,3.375],[41,3.375]]){
   assert.equal(heroLevelCost(level),Math.round((80+40*level+4*level**2)*factor/10)*10);
  }
 });

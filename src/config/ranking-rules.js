@@ -28,5 +28,5 @@ export function updateRecord(scores,category,value,details={}) {
 export const rankTitleId = category => 'rank_'+category;
 export function makeRankTitles(categories) {
  const names={prog:'끝까지 간 자',rush:'보스 사냥의 정점',endless:'무한의 정점',crystals:'영혼 결정의 주인',curse:'저주를 지배한 자'};
- return categories.map((category,index)=>({id:rankTitleId(category.key),no:200+index,name:names[category.key]??category.label+'의 정점',desc:'역대 '+category.label+' 1위 · 일요일 갱신',col:'#ffd060',rankCategory:category.key,cond:()=>false}));
+ return categories.filter(category=>!category.key.startsWith('time')).map((category,index)=>({id:rankTitleId(category.key),no:200+index,name:names[category.key]??category.label+'의 정점',desc:'역대 '+category.label+' 1위 · 일요일 갱신',col:'#ffd060',rankCategory:category.key,cond:()=>false}));
 }
