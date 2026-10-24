@@ -26,3 +26,21 @@ test('failed commits cannot report successful code activation or probability cha
  const service=createSparkService({auth,projectId:'demo',request:async(url)=>url.includes('/developers/')?response({},404):url.includes('/developerCodes/')?response({fields:encodeValue({kind:'helper',issuedBy:'test'}).mapValue.fields,updateTime:'v1'}):response({error:{message:'not found'}},404)});
  await assert.rejects(()=>service.call('redeemDeveloperCode',{code}),/not found/);
 });
+
+test('Spark rejects helper coupon creation and custom currency authorization before any commit',async()=>{
+ const requests=[];
+ const service=createSparkService({auth,projectId:'demo',request:async(url,options)=>{requests.push(options.method);return response({fields:encodeValue({kind:'helper',enabled:true}).mapValue.fields});}});
+ for(const action of ['createCoupon','setCurrency'])await assert.rejects(()=>service.call('developerOperation',{action,payload:{code:'NOPE',currency:'stones',amount:100}}),/메인 개발자/);
+ assert.deepEqual(requests,['GET','GET']);
+});
+test('Spark owner custom currency authorization records exact amounts and rejects invalid requests',async()=>{
+ const audits=[];
+ const service=createSparkService({auth,projectId:'demo',request:async(url,options)=>{
+  if(url.endsWith('/developers/player'))return response({fields:encodeValue({kind:'owner',enabled:true}).mapValue.fields});
+  if(url.endsWith(':commit')){audits.push(JSON.parse(options.body).writes[0]);return response({});}
+  throw new Error('unexpected '+url);
+ }});
+ assert.deepEqual(await service.call('developerOperation',{action:'setCurrency',payload:{currency:'crystals',amount:1234567890123}}),{currency:'crystals',amount:1234567890123});
+ assert.equal(decodeValue({mapValue:{fields:audits[0].update.fields}}).detail.amount,1234567890123);
+ await assert.rejects(()=>service.call('developerOperation',{action:'setCurrency',payload:{currency:'crystals',amount:-1}}));assert.equal(audits.length,1);
+});

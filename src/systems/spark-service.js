@@ -1,5 +1,6 @@
 import {validateProbabilities,canonical,DEFAULT_PROBABILITIES} from '../config/probability-rules.js';
 import {createSave} from '../game-data.js';
+import {allowDeveloper,validateDeveloperCurrency} from '../config/developer-rules.js';
 export const sparkHash=async value=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 export function encodeValue(value){
  if(value===null)return {nullValue:null};
@@ -33,7 +34,8 @@ export function createSparkService({auth,projectId,request=fetch,now=Date.now}){
   const existing=await roleFor(uid);if(existing?.enabled)return {uid,role:existing};
   const code=String(raw??'').trim().toUpperCase().replace(/\s+/g,'');if(!/^SC-DEV-[A-F0-9]{32}$/.test(code))throw new Error('올바른 개발자 코드를 입력하세요');
   const hash=await sparkHash(code),coupon=await get('developerCodes/'+hash);
-  if(!coupon||coupon.usedBy||coupon.expiresAt&&coupon.expiresAt<now())throw new Error('사용했거나 만료된 개발자 코드입니다');
+  if(!coupon)throw new Error('서버에 등록되지 않은 개발자 코드입니다. 관리자 등록이 필요합니다');
+  if(coupon.usedBy||coupon.expiresAt&&coupon.expiresAt<now())throw new Error('사용했거나 만료된 개발자 코드입니다');
   const role={kind:coupon.kind,enabled:true,grantHash:hash,grantedAt:now(),issuedBy:coupon.issuedBy??'bootstrap'};
   const writes=[write('developers/'+uid,role,{currentDocument:{exists:false}}),write('developerCodes/'+hash,{usedBy:uid,usedAt:now()},{updateMask:{fieldPaths:['usedBy','usedAt']},currentDocument:{updateTime:coupon._updateTime}}),{delete:root+'/rankings/'+uid}];
   if(role.kind==='owner')writes.push(write('developerSystem/root',{uid,claimHash:hash,claimedAt:now()},{updateMask:{fieldPaths:['uid','claimHash','claimedAt']}}));
@@ -41,7 +43,11 @@ export function createSparkService({auth,projectId,request=fetch,now=Date.now}){
  }
  async function operation(action,payload={}){
   const role=await roleFor(uid);if(!role?.enabled||!['owner','helper'].includes(role.kind))throw new Error('개발자 권한이 없습니다');
-  if(['issueCode','resetPlayer'].includes(action)&&role.kind!=='owner')throw new Error('최초 개발자만 사용할 수 있습니다');
+  if(!allowDeveloper(role,action))throw new Error('메인 개발자만 사용할 수 있습니다');
+  if(action==='setCurrency'){
+   const change=validateDeveloperCurrency(payload.currency,payload.amount);
+   await audit(action,change);return change;
+  }
   if(action==='issueCode'){
    const code='SC-DEV-'+[...crypto.getRandomValues(new Uint8Array(16))].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase(),hash=await sparkHash(code),expiresAt=now()+30*86400000;
    await commit([write('developerCodes/'+hash,{kind:'helper',issuedBy:uid,at:now(),expiresAt},{currentDocument:{exists:false}})]);await audit(action,{kind:'helper'});return {code,kind:'helper',expiresAt};

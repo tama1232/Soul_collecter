@@ -28,7 +28,7 @@ function environment() {
   globalThis.matchMedia = () => ({ matches: false, addEventListener() {} });
   globalThis.requestAnimationFrame = () => 1; globalThis.cancelAnimationFrame = () => {};
   globalThis.Image = class { width = 160; height = 96; set src(value) { this.url = value; queueMicrotask(() => this.onload?.()); } };
-  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'soul-collecter-0.6.0' }), headers: new Headers() });
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'soul-collecter-0.6.1' }), headers: new Headers() });
   const originalInterval = globalThis.setInterval;
   globalThis.setInterval = (...args) => { const timer = originalInterval(...args); timer.unref(); return timer; };
   globalThis.CONTRACT_CONFIG = { firebase: { apiKey: '', projectId: '' } };
@@ -55,6 +55,21 @@ test('real game modules boot, create an independent local account, save and rend
   }
   const { RunScene } = await import('../src/game.js');
   const run = new RunState(save, 123); const runScene = new RunScene(run); runScene.enter();
+  // Real TileWorld regressions: final-position-only collision used to miss these tiles.
+  const TileWorld=runScene.room.world.constructor;
+  const body=(x,y,vx,vy)=>({x,y,w:12,h:12,vx,vy,onGround:false,dropTimer:10,hitWall:0});
+  const horizontal=new TileWorld(20,20);for(let y=0;y<20;y++)horizontal.set(5,y,1);
+  const right=body(20,30,140,0);horizontal.move(right);assert.equal(right.x,68);assert.equal(right.hitWall,1);assert.equal(right.dropTimer,9);
+  const left=body(140,30,-120,0);horizontal.move(left);assert.equal(left.x,96);assert.equal(left.hitWall,-1);
+  const vertical=new TileWorld(20,20);for(let x=0;x<20;x++)vertical.set(x,5,1);
+  const down=body(30,20,0,140);vertical.move(down);assert.equal(down.y,68);assert.equal(down.onGround,true);
+  const up=body(30,140,0,-120);vertical.move(up);assert.equal(up.y,96);assert.equal(up.vy,0);
+  const {moveBodyTo}=await import('../src/engine/collision.js');
+  const blink=body(20,30,0,0);moveBodyTo(horizontal,blink,160,30);assert.equal(blink.x,68);assert.equal(blink.dropTimer,10);
+  const platform=new TileWorld(20,20);for(let x=0;x<20;x++)platform.set(x,5,2);
+  const fall=body(30,20,0,140);fall.dropTimer=0;platform.move(fall);assert.equal(fall.y,68);
+  const jump=body(30,140,0,-120);platform.move(jump);assert.ok(Math.abs(jump.y-20)<1e-9);
+  const drop=body(30,20,0,140);platform.move(drop);assert.ok(Math.abs(drop.y-160)<1e-9);assert.equal(drop.dropTimer,9);
   for (let tick = 0; tick < 5; tick++) { app.input.poll(); runScene.update(); app.input.endStep(); }
   runScene.world(app.r.w); runScene.ui(app.r.d);
   const second = new RunState(save, 2); assert.equal(second.stats.kills, 0);

@@ -32,8 +32,8 @@ for (const [file, source] of sources) {
   if (/contract-d6cf3|AIzaSyANYHUCo7Z/.test(source)) throw new Error('Original production backend leaked: ' + file);
   if (/new Function\(["']debugger/.test(source)) throw new Error('Anti-debug loop remains: ' + file);
 }
-for(const name of ['index.js','ranking-rules.js','weekly.js','development.js','probability-rules.js','bootstrap-owner.mjs']) {
+for(const name of ['index.js','ranking-rules.js','weekly.js','development.js','probability-rules.js','developer-rules.js','bootstrap-owner.mjs']) {
   const syntax=spawnSync(process.execPath,['--check',resolve(root,'functions',name)],{encoding:'utf8'});
   if(syntax.status) throw new Error(syntax.stderr);
 }
-console.log(`Checked ${files.length} client modules + 6 server modules; ${edges} import links.`);
+console.log(`Checked ${files.length} client modules + 7 server modules; ${edges} import links.`);

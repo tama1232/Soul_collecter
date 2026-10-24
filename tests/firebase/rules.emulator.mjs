@@ -35,6 +35,10 @@ try {
  await assertFails(setDoc(doc(victim,'developerAudit/fake'),{uid:'victim',at:1}));await assertSucceeds(setDoc(doc(bob,'developerAudit/real'),{uid:'bob',at:1}));
  await assertFails(setDoc(doc(bob,'runtimeConfig/probabilities'),{updatedBy:'alice',revision:1}));await assertSucceeds(setDoc(doc(bob,'runtimeConfig/probabilities'),{updatedBy:'bob',revision:1}));
  await assertFails(updateDoc(doc(bob,'runtimeConfig/probabilities'),{revision:1}));
+ await assertFails(setDoc(doc(bob,'coupons/helper-coupon'),{code:'HELPER',reward:'{"stones":100}',createdBy:'bob'}));
+ await assertFails(setDoc(doc(victim,'coupons/forged-coupon'),{code:'FORGED',reward:'{}',createdBy:'alice'}));
+ await assertSucceeds(setDoc(doc(alice,'coupons/owner-coupon'),{code:'OWNER',reward:'{"stones":100}',createdBy:'alice'}));
+ await assertSucceeds(getDoc(doc(victim,'coupons/owner-coupon')));
  await assertFails(deleteDoc(doc(alice,'developers/alice')));
- console.log('PASS: real Firestore rules, atomic root/helper activation, replay rejection, private saves, owner-only reset, immutable awards.');
+ console.log('PASS: real Firestore rules, atomic root/helper activation, replay rejection, private saves, owner-only reset, immutable awards, owner-only coupon creation.');
 } finally {await env.cleanup();}

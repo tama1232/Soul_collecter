@@ -1,5 +1,5 @@
 {
-  "version": "soul-collecter-0.6.0",
+  "version": "soul-collecter-0.6.1",
   "files": {
     "config.js": "bc48973387edfd771c4648e61d935c6baa1acdae8f5bd6f6c30f93f1e769b47b",
     "src/art/arien.js": "a978dc4024f654211d98e5634c64d92700bb4c58ed2f9b4caa0594fbe109b65f",
@@ -20,6 +20,7 @@
     "src/art/solen.js": "00a0d7652d2b53dfee442f26f7361652efe8fc2fe3d39e0f55c3643a4b7bf110",
     "src/art/vega.js": "22959f46d6df713928ff58a8f18ba5b461e1dddf41cbefd09e35e0e832f4db5e",
     "src/config/content.js": "00fa0bb68a65a9a3de528accd00a43ac118ca2b4a649bebc26af6d64652cf603",
+    "src/config/developer-rules.js": "c7ede3329f1a81c645ad0460e3a5edbedea92b178f63a8a137516526c47719c2",
     "src/config/economy.js": "6198a1a1087ef38c4a6de171b8b6976d6e4de6c4af16d8bea25f0a9c889fded7",
     "src/config/expansion.js": "bdb1812b763a8754f19a8ee4876021bcce54dafda5566d90451de3192699f092",
     "src/config/growth-limits.js": "8269d973c31a337478eba1551d2b0f677e3f491d369c74390caa61cd92fea413",
@@ -27,13 +28,14 @@
     "src/config/probability-rules.js": "e8996e672a1428de56708865aeb8944bc9fb443da8002bbcf5dd6953ece38299",
     "src/config/ranking-rules.js": "b46500e07b8ddd88e449d1877a24a90bf56f0699b36d1a67f4b88a0c8f346053",
     "src/config/sprites.js": "0042c87b30fcb675dc1abdd3ff980d20cac7a9cd363c3d24bf3b9809558974b5",
-    "src/config/version.js": "19adc5a90e0494e378ece03d33e41d006f42f3172d4f8a67e4eab690a0c88f42",
+    "src/config/version.js": "ad6b99415a4fff1456574cc18928401c9881c7785384099a711d8e9e6af48398",
+    "src/engine/collision.js": "8522df38d5387f56dd08a3a4339dd86b033334864b71eabca62bbd83bf9e86c7",
     "src/engine/loop.js": "3120e430380309a606c99195b8986d44c63ed73da4a8d83a465a6f7d9dc9b1a0",
     "src/engine/render-utils.js": "c1224b6eea9a5b2ac3fa12af693f9c08ff6ff0d6406c10b861e075db86c321a5",
     "src/engine/renderer.js": "9d5a50ebc5ff1c62cd53f1d60bbb374bab451765882b830369208178a42e32ab",
     "src/features/achievements.js": "17ced2a9406927d5b71d1c1ac8ee54871a710a4e3f3c67e62390a5c910cf5138",
     "src/features/codex.js": "bffd09c12d855971d618039b36e64275ff89ad7cb9c6bb01568c452baf082178",
-    "src/features/developer-console.js": "1056d9b52d496c7e0e8b671edcef555d7b839ba4d2ccd3d31011bfd11c378e89",
+    "src/features/developer-console.js": "5bb53465f1de7b859b3b1dbd7c2f9218ef433998d7d9e56338ffbf80d0936920",
     "src/features/gacha.js": "66cc7023cc23cf5f45dcdb11320fc09a1fb7eb9bf453ae62a580df2c0c8a0e8c",
     "src/features/growth.js": "f5605ecabf4a8a9d179d1ea9fba3332705e2fcfea96a0a7174493e668c61ce94",
     "src/features/legacy-admin.js": "f537fe66c364dde865a86e4f8401724fed6cffe756bf79f6f8baec844bd158ba",
@@ -41,11 +43,11 @@
     "src/features/upgrades.js": "16b23191f631176d853eeb8b5079c03a8162bf26ca80ab6e449f1e482a07a4c4",
     "src/features/weapon-pickup.js": "35c4c3aa0ac904999d1db5f815546463da3dbe4970f10467056a1ec110784302",
     "src/game-data.js": "d830bbcf96f08c8060288ed4cd76b602c98823f9315b0c7d5e5e5fba8033b7fe",
-    "src/game.js": "42bf2775a27a453735b7cd847a5e9979397752c5efb426ee3efe6f91a993530e",
-    "src/systems/developer-service.js": "fd67dd5daf9d0795a3060156438f656cb9b3fe8a41a753196ed05a4bc2b3f97b",
+    "src/game.js": "97c36f00b2ccd0fcaa433e5cc9c8508e7a4375f70e7403702bff8183930b6c60",
+    "src/systems/developer-service.js": "f6b1d67619cb2ed8ec378fcdfb360f7c6eae2991f24c5fec438731cc501f95d3",
     "src/systems/progression.js": "33635ffaa6936836fbfed35e71fbdf3332af49be58da53b7350d3114f54bf742",
     "src/systems/rank-titles.js": "a5b8b0db8a2f3e91d4db3f8e60bb42228bc1761011290d39ff9773b66ace9233",
-    "src/systems/spark-service.js": "891d8563ec8f300c9f32152ee017045bd8ec000b7378d52b1fe7fb5698e59a27",
+    "src/systems/spark-service.js": "9d55d692942bb80c010c443d88f666e5b321fe2db8e0511544a913f3b4f1e866",
     "src/systems/weekly.js": "d890c5ed7179be176ff075c0b288dd1368c563cc9099293f1908ccf8667c14da"
   }
 }

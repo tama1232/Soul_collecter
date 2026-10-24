@@ -1,3 +1,4 @@
+import {moveTileBody,moveBodyTo} from './engine/collision.js';
 import {growthNotice} from './config/growth-limits.js';
 import {rankingRow,sortRanking,compareRecords,ALL_TIME_CATEGORIES} from './config/ranking-rules.js';
 import {fetchRankTitles,setRankTitleSnapshot} from './systems/rank-titles.js';
@@ -16973,7 +16974,8 @@ class TileWorld {
   solidPx(_0x4f2576, _0xad4187) {
     return this.solid(Math.floor(_0x4f2576 / F), Math.floor(_0xad4187 / F));
   }
-  move(_0x312ead, _0x1f3168 = !1) {
+  move(body,ignoreOneWay=false) { moveTileBody(this,body,ignoreOneWay); }
+  moveStep(_0x312ead, _0x1f3168 = !1) {
     if ((_0x312ead.hitWall = 0, _0x312ead.x += _0x312ead.vx, _0x312ead.vx !== 0)) {
       const _0x301a71 = _0x312ead.vx > 0 ? 1 : -1, _0x1ca98c = _0x301a71 > 0 ? _0x312ead.x + _0x312ead.w : _0x312ead.x, _0x1f0aef = Math.floor((_0x301a71 > 0 ? _0x1ca98c - 0.001 : _0x1ca98c) / F), _0x3d7949 = Math.floor(_0x312ead.y / F), _0x35f8be = Math.floor((_0x312ead.y + _0x312ead.h - 0.001) / F);
       for (let _0x67f908 = _0x3d7949; _0x67f908 <= _0x35f8be; _0x67f908++) if (this.solid(_0x1f0aef, _0x67f908)) {
@@ -26212,7 +26214,7 @@ class CombatRoom {
                 for (const [_0x26c5c0, _0x13906e] of [[1, 1], [_0x5d386a.b.w - 1, 1], [1, _0x5d386a.b.h - 1], [_0x5d386a.b.w - 1, _0x5d386a.b.h - 1], [_0x5d386a.b.w / 2, _0x5d386a.b.h / 2]]) if (this.world.solidPx(_0x460d66 + _0x26c5c0, _0x4165dc + _0x13906e)) return !1;
                 return !0;
               }, _0x174216 = [_0x6696d8.cx + _0x535cd2 * (_0x6696d8.b.w / 2 + 6), _0x6696d8.cx - _0x535cd2 * (_0x6696d8.b.w / 2 + 6), _0x6696d8.cx].map(_0x454f9f => Math.max(16, Math.min(this.world.pxW - 16, _0x454f9f)) - _0x5d386a.b.w / 2);
-              (_0x5d386a.b.x = _0x174216.find(_0x293f04) ?? _0x174216[2], _0x5d386a.b.y = _0x2ab572 - _0x5d386a.b.h, _0x5d386a.b.vx = 0, _0x5d386a.b.vy = 0, this.unstick(_0x5d386a.b), _0x5d386a.facing = _0x5d386a.cx < _0x6696d8.cx ? 1 : -1, this.fx.burst(_0x5d386a.cx, _0x5d386a.cy, _0x4d4abd, 12, 2));
+              (moveBodyTo(this.world,_0x5d386a.b,_0x174216.find(_0x293f04) ?? _0x174216[2],_0x2ab572 - _0x5d386a.b.h), _0x5d386a.b.vx = 0, _0x5d386a.b.vy = 0, this.unstick(_0x5d386a.b), _0x5d386a.facing = _0x5d386a.cx < _0x6696d8.cx ? 1 : -1, this.fx.burst(_0x5d386a.cx, _0x5d386a.cy, _0x4d4abd, 12, 2));
               break;
             }
           }
@@ -26225,10 +26227,8 @@ class CombatRoom {
             } else _0x1632c5 = _0x5d386a.cx + _0x2405ff * _0x1c04cb.dx;
           } else _0x1632c5 = _0x5d386a.cx + _0x2405ff * _0x1c04cb.dx;
           (this.fx.ghost(_0x5d386a.frame(), _0x5d386a.cx - 24, _0x5d386a.b.y + _0x5d386a.b.h - 44, _0x5d386a.facing < 0, _0x4d4abd, 18), _0x1632c5 = Math.max(16, Math.min(this.world.pxW - 16, _0x1632c5)));
-          const _0xdf9ee1 = Math.sign(_0x1632c5 - _0x5d386a.cx);
-          let _0x2065bd = _0x5d386a.cx;
-          for (let _0x1ea9f0 = 0; _0x1ea9f0 < 400 && Math.abs(_0x2065bd - _0x1632c5) > 2 && !(this.world.solidPx(_0x2065bd + _0xdf9ee1 * 6, _0x5d386a.cy) || this.world.solidPx(_0x2065bd + _0xdf9ee1 * 6, _0x5d386a.b.y + 2)); _0x1ea9f0++) _0x2065bd += _0xdf9ee1 * 2;
-          (_0x5d386a.b.x = _0x2065bd - _0x5d386a.b.w / 2, this.fx.burst(_0x5d386a.cx, _0x5d386a.cy, _0x4d4abd, 10, 2));
+          moveBodyTo(this.world,_0x5d386a.b,_0x1632c5 - _0x5d386a.b.w / 2,_0x5d386a.b.y);
+          this.fx.burst(_0x5d386a.cx,_0x5d386a.cy,_0x4d4abd,10,2);
           break;
         }
       case "meteor":

@@ -1,6 +1,8 @@
 import {createSparkService} from './spark-service.js';
 import {applyProbabilities,getProbabilities,getRulesRevision} from '../config/live-rules.js';
 import {canonical} from '../config/probability-rules.js';
+import {unlockOwnerContent,setDeveloperCurrency,validateDeveloperCurrency} from '../config/developer-rules.js';
+import {CHARACTERS,BOOKS} from '../game-data.js';
 export async function sha256(text) {return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(byte=>byte.toString(16).padStart(2,'0')).join('');}
 export function firestoreValue(value) {
   if(value.mapValue) return Object.fromEntries(Object.entries(value.mapValue.fields??{}).map(([key,v])=>[key,firestoreValue(v)]));
@@ -37,7 +39,7 @@ export const developerService={
     if(store?.session?.kind!=='firebase'||config().functionsEnabled===false&&config().developerBackend!=='spark'){verified=null;return null;}
     const role=await this.call('developerStatus');
     if(store?.session?.uid!==uid) return null;verified={...role,expiresAt:Date.now()+90000};
-    const game=getGame?.();if(game?.save){game.save.developerRole=role.role?.enabled?role.role.kind:null;if(role.role?.enabled){game.save.dbg=true;game.save.rankBan=true;}game.persist();}
+    const game=getGame?.();if(game?.save){game.save.developerRole=role.role?.enabled?role.role.kind:null;if(role.role?.enabled){game.save.dbg=true;game.save.rankBan=true;unlockOwnerContent(game.save,role.role,CHARACTERS,BOOKS);}game.persist();}
     const settings=await this.document('runtimeConfig/probabilities');
     if(settings) {
       if(getRulesRevision()===settings.revision && await sha256(canonical(getProbabilities()))!==settings.hash) await this.call('reportIntegrity',{reason:'실행 중 확률 설정 불일치',expected:settings.hash,actual:await sha256(canonical(getProbabilities()))});
@@ -46,6 +48,14 @@ export const developerService={
   },
   async redeem(code){const result=await this.call('redeemDeveloperCode',{code});verified=result;await this.sync();return result;},
   async operation(action,payload={}){if(!this.authorized) throw new Error('개발자 코드 등록이 필요합니다');return this.call('developerOperation',{action,payload});},
+  async setCurrency(currency,amount){
+    validateDeveloperCurrency(currency,amount);
+    const uid=store?.session?.uid,game=getGame?.(),save=game?.save;
+    if(this.role?.kind!=='owner'||!save)throw new Error('메인 개발자만 재화를 직접 설정할 수 있습니다');
+    await this.operation('setCurrency',{currency,amount});
+    if(store?.session?.uid!==uid||getGame?.()?.save!==save||this.role?.kind!=='owner')throw new Error('계정이 변경되었습니다. 현재 계정에서 다시 시도하세요');
+    setDeveloperCurrency(save,this.role,currency,amount);game.persist();
+  },
   async inspectIntegrity() {
     const remote=await this.document('runtimeConfig/probabilities'),actual=await sha256(canonical(getProbabilities()));
     const result={revision:getRulesRevision(),expected:remote?.hash??null,actual,rulesMatch:!remote||remote.hash===actual,files:[],serverBaseline:false};

@@ -23,7 +23,7 @@ test('root code is globally single-use, helper code cannot issue codes or reset 
  const issued=await handlers.operation('owner','issueCode');await handlers.redeem('helper',issued.code);
  await assert.rejects(()=>handlers.redeem('third',issued.code),/사용했거나/);
  assert.equal(allowDeveloper({enabled:true,kind:'helper'},'updateProbabilities'),true);
- for(const action of ['issueCode','resetPlayer'])await assert.rejects(()=>handlers.operation('helper',action,{uid:'victim',kind:'owner'}),/권한/);
+ for(const action of ['issueCode','resetPlayer','createCoupon','setCurrency'])await assert.rejects(()=>handlers.operation('helper',action,{uid:'victim',kind:'owner'}),/권한/);
  await assert.rejects(()=>handlers.operation('normal','createCoupon',{}),/권한/);
 });
 
@@ -42,7 +42,7 @@ test('probability edits are validated, revision-checked, audited and affect the 
 
 test('developer-created coupon hash matches actual in-game redemption; owner reset preserves receipts',async()=>{
  const db=memoryDb();db.records.set('developers/owner',{kind:'owner',enabled:true});db.records.set('developers/helper',{kind:'helper',enabled:true});const handlers=createDeveloperHandlers({db,defaultSave:createSave(),now:()=>123456});
- await handlers.operation('helper','createCoupon',{code:'PATCH_TEST',reward:{stones:100,compass:2},desc:'test'});
+ await handlers.operation('owner','createCoupon',{code:'PATCH_TEST',reward:{stones:100,compass:2},desc:'test'});
  const coupon=db.records.get('coupons/'+data_Rr('PATCH_TEST'));assert.equal(JSON.parse(coupon.reward).compass,2);
  const save=createSave();save.stones=999999;save.storyMax=28;save.rankClaims={previous:true};save.usedCoupons=['keep'];
  db.records.set('saves/player',{id:'player',data:JSON.stringify(save),rev:5,updated:1,sid:'old'});db.records.set('rankings/player',{prog:1000});

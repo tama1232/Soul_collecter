@@ -1,10 +1,9 @@
 import {createHash,randomBytes} from 'node:crypto';
 import {DEFAULT_PROBABILITIES,validateProbabilities,canonical} from './probability-rules.js';
+import {allowDeveloper,validateDeveloperCurrency} from './developer-rules.js';
+export {allowDeveloper} from './developer-rules.js';
 export const hashCode=code=>createHash('sha256').update(code.trim().toUpperCase().replace(/\s+/g,'')).digest('hex');
 export const hashRules=rules=>createHash('sha256').update(canonical(rules)).digest('hex');
-export function allowDeveloper(role,action) {
-  return role?.enabled===true && ['owner','helper'].includes(role.kind) && (!['issueCode','resetPlayer'].includes(action)||role.kind==='owner');
-}
 function denied(message='이 작업의 개발자 권한이 없습니다') {const error=new Error(message);error.code='permission-denied';throw error;}
 export function createDeveloperHandlers({db,defaultSave,now=Date.now,newCode=()=> 'SC-DEV-'+randomBytes(16).toString('hex').toUpperCase()}) {
   const roleFor=async uid=>{const doc=await db.doc('developers/'+uid).get();return doc.exists?doc.data():null;};
@@ -20,7 +19,8 @@ export function createDeveloperHandlers({db,defaultSave,now=Date.now,newCode=()=
       const [coupon,account,rootState]=await Promise.all([tx.get(ref),tx.get(roleRef),tx.get(root)]);
       if(account.exists&&account.data().enabled) return account.data();
       const data=coupon.exists?coupon.data():null;
-      if(!data||data.usedBy||data.expiresAt&&data.expiresAt<now()) denied('사용했거나 만료된 개발자 코드입니다');
+      if(!data) denied('서버에 등록되지 않은 개발자 코드입니다. 관리자 등록이 필요합니다');
+      if(data.usedBy||data.expiresAt&&data.expiresAt<now()) denied('사용했거나 만료된 개발자 코드입니다');
       if(!['owner','helper'].includes(data.kind)) denied();
       if(data.kind==='owner'&&rootState.data()?.uid) denied('최초 개발자 계정이 이미 등록되었습니다');
       const granted={kind:data.kind,enabled:true,grantedAt:now(),issuedBy:data.issuedBy??'bootstrap'};
@@ -33,6 +33,10 @@ export function createDeveloperHandlers({db,defaultSave,now=Date.now,newCode=()=
   }
   async function operation(uid,action,payload={}) {
     if(!uid) denied('로그인이 필요합니다');const role=await roleFor(uid);if(!allowDeveloper(role,action)) denied();
+    if(action==='setCurrency') {
+      const change=validateDeveloperCurrency(payload.currency,payload.amount);
+      await audit(uid,action,change);return change;
+    }
     if(action==='issueCode') {
       const code=newCode(),hash=hashCode(code);
       await db.doc('developerCodes/'+hash).create({kind:'helper',issuedBy:uid,at:now(),expiresAt:now()+30*86400000});

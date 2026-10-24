@@ -1,3 +1,4 @@
+import {DEVELOPER_CURRENCIES} from '../config/developer-rules.js';
 import {getProbabilities,getRulesRevision,applyProbabilities} from '../config/live-rules.js';
 /** Account-bound tools. Every privileged server action rechecks the server role. */
 export function installDeveloperConsole({getGame,developer,characters,weapons}) {
@@ -17,8 +18,9 @@ export function installDeveloperConsole({getGame,developer,characters,weapons}) 
     document.body.append(root);root.querySelector('[data-close]').onclick=close;
     message('서버에서 개발자 권한을 확인하고 있습니다…');
     try{await developer.sync();if(!root)return;if(!developer.authorized){message('설정 → 쿠폰 코드 입력에서 개발자 코드를 등록한 온라인 계정만 사용할 수 있습니다.');return;}
-      root.querySelector('[data-role]').textContent=developer.role.kind==='owner'?'최초 개발자 · 코드 발급/계정 초기화 가능':'보조 개발자 · 코드 발급/계정 초기화 제한';
-      const nav=root.querySelector('nav');for(const [key,label] of [['probabilities','실제 확률'],['players','계정·세부 기록'],['coupons','쿠폰 만들기'],...developer.role.kind==='owner'?[['codes','개발자 코드 발급']]:[],['audit','변경·무결성 기록'],['tools','플레이 테스트']])button(label,()=>render(key),nav);
+      root.querySelector('[data-role]').textContent=developer.role.kind==='owner'?'메인 개발자 · 전체 캐릭터/장 해금 · 재화 설정 · 쿠폰/코드 발급':'부개발자 · 쿠폰/개발자 코드 발급 및 계정 초기화 불가';
+      const nav=root.querySelector('nav');for(const [key,label] of [['probabilities','실제 확률'],['players','계정·세부 기록'],...developer.role.kind==='owner'?[['coupons','쿠폰 만들기'],['codes','개발자 코드 발급']]:[],['audit','변경·무결성 기록'],['tools','플레이 테스트']])button(label,()=>render(key),nav);
+      if(developer.role.kind!=='owner'&&['coupons','codes'].includes(active))active='probabilities';
       await render(active);message('서버 권한 확인 완료');
     }catch(error){message(error.message);}
   }
@@ -44,10 +46,11 @@ export function installDeveloperConsole({getGame,developer,characters,weapons}) 
       button('새로고침',()=>load(false));button('다음 50개',()=>cursor?load(true):message('마지막 페이지입니다'));await load(false);return;
     }
     if(tab==='codes'){
-      if(developer.role.kind!=='owner')throw new Error('최초 개발자만 발급할 수 있습니다');content().append(element('p','발급 코드는 한 계정에서 한 번만 사용할 수 있고 30일 뒤 만료됩니다. 보조 개발자는 개발자 코드 발급과 유저 초기화를 할 수 없습니다.'));
+      if(developer.role.kind!=='owner')throw new Error('최초 개발자만 발급할 수 있습니다');content().append(element('p','발급 코드는 한 계정에서 한 번만 사용할 수 있고 30일 뒤 만료됩니다. 부개발자는 쿠폰 제작·개발자 코드 발급·유저 초기화를 할 수 없습니다.'));
       button('보조 개발자 코드 발급',async()=>{const result=await developer.operation('issueCode');output(result);message('코드는 이 화면에 한 번 표시됩니다. 사용할 사람에게 전달하세요.');});return;
     }
     if(tab==='coupons'){
+      if(developer.role.kind!=='owner')throw new Error('메인 개발자만 쿠폰을 만들 수 있습니다');
       const form=element('form');content().append(form);const code=field(form,'쿠폰 코드','code'),desc=field(form,'설명','desc'),until=field(form,'만료일(선택)','until','','date'),rewards={};for(const [key,label] of [['stones','영혼석'],['crystals','영혼 결정'],['compass','나침반'],['awShards','각성 파편']])rewards[key]=field(form,label,key,0,'number');
       button('쿠폰 발급',async()=>{const reward=Object.fromEntries(Object.entries(rewards).map(([key,input])=>[key,Number(input.value)]));const result=await developer.operation('createCoupon',{code:code.value,desc:desc.value,until:until.value,reward});message('쿠폰을 생성했습니다: '+result.code);},form);return;
     }
@@ -58,6 +61,13 @@ export function installDeveloperConsole({getGame,developer,characters,weapons}) 
     if(tab==='tools'){
       content().append(element('p','테스트 도구는 현재 개발자 계정에만 적용됩니다. 무적·재화·방 이동은 디버그 모드를 켠 뒤 1~5 키로도 사용할 수 있습니다.'));
       const game=getGame();
+      if(developer.role.kind==='owner'){
+        content().append(element('p','메인 개발자는 모든 캐릭터와 현재 공개된 장이 자동 해금됩니다. 재화는 원하는 보유 수량으로 설정할 수 있습니다.'));
+        const form=element('form'),label=element('label','재화 종류'),currency=element('select');
+        currency.name='currency';for(const [key,name] of DEVELOPER_CURRENCIES){const option=element('option',name);option.value=key;currency.append(option);}currency.value='stones';label.append(currency);form.append(label);content().append(form);
+        const amount=field(form,'설정할 보유 수량','amount',1000000,'number');amount.step='1';amount.max=String(Number.MAX_SAFE_INTEGER);
+        button('입력한 수량으로 설정',async()=>{if(!amount.value.trim())throw new Error('보유 수량을 입력하세요');await developer.setCurrency(currency.value,Number(amount.value));message('재화 보유 수량을 '+Number(amount.value).toLocaleString()+'개로 설정했습니다.');},form);
+      }
       const test=async(action,run)=>{await developer.operation('recordTestAction',{action});run();game.persist();message('테스트 적용: '+action);};
       button('디버그 켜기/끄기',()=>test('toggleDebug',()=>game.setDebug(!game.debug)));
       button('테스트 재화 +100만',()=>test('testCurrency',()=>{for(const key of ['stones','crystals','compass','awShards'])game.save[key]=(game.save[key]??0)+1e6;}));

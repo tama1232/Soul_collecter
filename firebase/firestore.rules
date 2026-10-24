@@ -52,7 +52,7 @@ service cloud.firestore {
       allow delete: if ownerDeveloper() || owner(uid) && existsAfter(/databases/$(database)/documents/developers/$(uid));
     }
     match /sanctions/{uid} { allow get: if owner(uid)||developer(); allow list: if developer(); allow create,update: if ownerDeveloper() && request.resource.data.by == request.auth.uid; allow delete: if false; }
-    match /coupons/{code} { allow get: if signedIn(); allow list: if developer(); allow create: if developer() && request.resource.data.createdBy == request.auth.uid; allow update,delete: if false; }
+    match /coupons/{code} { allow get: if signedIn(); allow list: if developer(); allow create: if ownerDeveloper() && request.resource.data.createdBy == request.auth.uid; allow update,delete: if false; }
     match /audit/{record} {
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.snap is string && request.resource.data.at is int;
       allow get,list: if developer() || signedIn() && resource.data.uid == request.auth.uid;
