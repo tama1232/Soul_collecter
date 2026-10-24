@@ -1,3 +1,4 @@
+import {createSparkService} from './spark-service.js';
 import {applyProbabilities,getProbabilities,getRulesRevision} from '../config/live-rules.js';
 import {canonical} from '../config/probability-rules.js';
 export async function sha256(text) {return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(byte=>byte.toString(16).padStart(2,'0')).join('');}
@@ -18,10 +19,11 @@ export const developerService={
   get role(){return verified?.uid===store?.session?.uid&&verified?.expiresAt>Date.now()&&verified?.role?.enabled?verified.role:null;},
   get authorized(){return !!this.role;},
   async call(name,data={}) {
-    if(config().functionsEnabled===false) throw new Error('개발자 서버가 아직 활성화되지 않았습니다');
+    if(config().functionsEnabled===false&&config().developerBackend!=='spark') throw new Error('개발자 서버가 아직 활성화되지 않았습니다');
     if(store?.session?.kind!=='firebase') throw new Error('전체 계정용 개발자 기능은 Firebase 온라인 계정과 서버 배포가 필요합니다');
     const auth=await store.authToken();if(!auth) throw new Error('다시 로그인하세요');
     const project=config().firebase?.projectId,region=config().functionsRegion??'asia-northeast3';
+    if(config().developerBackend==='spark')return createSparkService({auth,projectId:project}).call(name,data);
     const response=await fetch(`https://${region}-${project}.cloudfunctions.net/${name}`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+auth.idToken},body:JSON.stringify({data})});
     const body=await response.json();if(!response.ok||body.error) throw new Error(body.error?.message??'개발 서버 요청에 실패했습니다');return body.result??body.data;
   },
@@ -32,7 +34,7 @@ export const developerService={
   },
   async sync() {
     const uid=store?.session?.uid;
-    if(store?.session?.kind!=='firebase'||config().functionsEnabled===false){verified=null;return null;}
+    if(store?.session?.kind!=='firebase'||config().functionsEnabled===false&&config().developerBackend!=='spark'){verified=null;return null;}
     const role=await this.call('developerStatus');
     if(store?.session?.uid!==uid) return null;verified={...role,expiresAt:Date.now()+90000};
     const game=getGame?.();if(game?.save){game.save.developerRole=role.role?.enabled?role.role.kind:null;if(role.role?.enabled){game.save.dbg=true;game.save.rankBan=true;}game.persist();}

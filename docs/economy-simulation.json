@@ -1,10 +1,42 @@
 {
-  "economyVersion": 3,
+  "growthCaps": [
+    {
+      "completedBooks": 0,
+      "cap": 10,
+      "heroTotal": 3660,
+      "skillTotal": 1930
+    },
+    {
+      "completedBooks": 1,
+      "cap": 20,
+      "heroTotal": 26230,
+      "skillTotal": 10370
+    },
+    {
+      "completedBooks": 2,
+      "cap": 30,
+      "heroTotal": 98120,
+      "skillTotal": 33710
+    },
+    {
+      "completedBooks": 3,
+      "cap": 40,
+      "heroTotal": 269820,
+      "skillTotal": 85250
+    },
+    {
+      "completedBooks": 4,
+      "cap": 50,
+      "heroTotal": 544600,
+      "skillTotal": 162230
+    }
+  ],
+  "economyVersion": 4,
   "assumptions": "All stories cleared, curse 0, no income bonuses; simulated currencies, not measured player time.",
   "totals": {
-    "heroLevel1To20": 19000,
+    "heroLevel1To50": 544600,
     "weapon0To50": 83560,
-    "oneSkill0To50": 64560,
+    "oneSkill0To50": 162230,
     "eightStarAwakening0To5": 4250
   },
   "trials": [

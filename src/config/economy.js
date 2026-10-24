@@ -1,7 +1,8 @@
+import {MAX_GROWTH_CAP} from './growth-limits.js';
 import {getProbabilities} from './live-rules.js';
 import {cycleMultiplier} from './expansion.js';
 /** Shared deterministic prices and rewards. */
-export const ECONOMY_VERSION = 3;
+export const ECONOMY_VERSION = 4;
 export const ECONOMY = Object.freeze({
   bossTrialLength: 6,
   bookFactors: [1, 1.5, 2.1, 2.8],
@@ -13,9 +14,10 @@ export const ECONOMY = Object.freeze({
 });
 const round10 = value => Math.round(value / 10) * 10;
 const bounded = (value, min, max) => Math.max(min, Math.min(max, Number.isFinite(value) ? Math.floor(value) : min));
-export const heroLevelCost = level => round10(80 + 40 * bounded(level, 1, 20) + 4 * bounded(level, 1, 20) ** 2);
+const growthIncomeFactor=level=>ECONOMY.bookFactors[Math.min(3,Math.floor((level-1)/10))];
+export const heroLevelCost = level => {level=bounded(level,1,MAX_GROWTH_CAP);return round10((80+40*level+4*level**2)*growthIncomeFactor(level));};
 export const weaponEnhanceCost = next => round10(80 + 22 * bounded(next, 1, 50) + 1.2 * bounded(next, 1, 50) ** 2);
-export const skillMasteryCost = next => round10(60 + 18 * bounded(next, 1, 50) + 0.9 * bounded(next, 1, 50) ** 2);
+export const skillMasteryCost = next => {next=bounded(next,1,MAX_GROWTH_CAP);return round10((60+18*next+.9*next**2)*growthIncomeFactor(next));};
 export const awakeningCost = (rarity, current = 0) => Math.ceil((ECONOMY.awakeningBase[rarity] ?? 320) * (1 + bounded(current, 0, 4) * 0.35));
 export function permanentUpgrade(definition, expandedFactor = 3, effectFactor = 0.7) {
   const uncapped = ['hp','atk','skill'].includes(definition.id);

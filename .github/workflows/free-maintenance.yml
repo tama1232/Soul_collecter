@@ -1,0 +1,48 @@
+name: Free weekly awards and encrypted archive
+on:
+  schedule:
+    - cron: '17 15 * * *' # 00:17 Asia/Seoul, retry daily if Sunday is delayed
+  workflow_dispatch:
+permissions:
+  contents: write
+  id-token: write
+concurrency:
+  group: free-maintenance
+  cancel-in-progress: false
+jobs:
+  maintain:
+    if: github.repository == 'tama1232/Soul_collecter' && vars.FREE_BACKEND_READY == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/287603737833/locations/global/workloadIdentityPools/soul-github/providers/main-actions
+          service_account: soul-weekly@soul-collecter-c2ba0.iam.gserviceaccount.com
+      - run: npm ci --prefix functions --ignore-scripts
+      - name: Prepare encrypted archive branch
+        shell: bash
+        run: |
+          git config --global user.name soul-maintenance
+          git config --global user.email soul-maintenance@users.noreply.github.com
+          if git ls-remote --exit-code --heads origin game-archive; then
+            git fetch origin game-archive
+            git worktree add archive-data FETCH_HEAD
+          else
+            git worktree add --detach archive-data
+            cd archive-data
+            git switch --orphan game-archive
+            echo 'Encrypted history only. Decrypt with your private archive key; never commit that key.' > README.md
+            git add README.md
+            git commit -m 'Create encrypted game archive'
+            git push origin HEAD:game-archive
+          fi
+      - name: Settle weekly leaders and monitor 75 percent storage threshold
+        env:
+          GOOGLE_CLOUD_PROJECT: soul-collecter-c2ba0
+          ARCHIVE_PUBLIC_KEY: ${{ vars.ARCHIVE_PUBLIC_KEY }}
+        run: node scripts/free-maintenance.mjs

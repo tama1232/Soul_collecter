@@ -4,19 +4,38 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function owner(uid) { return signedIn() && request.auth.uid == uid; }
     function developer() { return signedIn() && exists(/databases/$(database)/documents/developers/$(request.auth.uid)) && get(/databases/$(database)/documents/developers/$(request.auth.uid)).data.get('enabled', false) == true; }
+    function ownerDeveloper() { return developer() && get(/databases/$(database)/documents/developers/$(request.auth.uid)).data.kind == 'owner'; }
+    function claimedCode(hash) {
+      let before = get(/databases/$(database)/documents/developerCodes/$(hash)).data;
+      let after = getAfter(/databases/$(database)/documents/developerCodes/$(hash)).data;
+      return before.get('usedBy','') == '' && before.get('expiresAt',4102444800000) >= request.time.toMillis() && after.usedBy == request.auth.uid;
+    }
+    function validGrant(uid) {
+      let grant = request.resource.data;
+      let code = get(/databases/$(database)/documents/developerCodes/$(grant.grantHash)).data;
+      return owner(uid) && grant.keys().hasOnly(['kind','enabled','grantHash','grantedAt','issuedBy']) && grant.enabled == true && grant.kind == code.kind && grant.issuedBy == code.get('issuedBy','bootstrap') && claimedCode(grant.grantHash) && (grant.kind == 'helper' || grant.kind == 'owner' && getAfter(/databases/$(database)/documents/developerSystem/root).data.uid == uid && getAfter(/databases/$(database)/documents/developerSystem/root).data.claimHash == grant.grantHash);
+    }
     function everDeveloper(uid) { return exists(/databases/$(database)/documents/developers/$(uid)); }
     function notBlocked(uid) { return !exists(/databases/$(database)/documents/sanctions/$(uid)) || get(/databases/$(database)/documents/sanctions/$(uid)).data.get('block', false) != true; }
     function rankEligible(uid) { return !everDeveloper(uid) && (!exists(/databases/$(database)/documents/sanctions/$(uid)) || get(/databases/$(database)/documents/sanctions/$(uid)).data.get('rankBan', false) != true); }
     function validSave() {
       return request.resource.data.keys().hasOnly(['id','data','updated','rev','sid']) && request.resource.data.id is string && request.resource.data.id.size() <= 16 && request.resource.data.data is string && request.resource.data.data.size() < 700000 && request.resource.data.updated is int && request.resource.data.rev is int && request.resource.data.sid is string;
     }
-    match /developers/{uid} { allow get: if owner(uid); allow list, write: if false; }
+    match /developers/{uid} { allow get: if owner(uid)||developer(); allow create: if validGrant(uid); allow list,update,delete: if false; }
     match /admins/{uid} { allow read, write: if false; }
-    match /developerCodes/{code} { allow read, write: if false; }
-    match /developerSystem/{state} { allow read, write: if false; }
-    match /developerAudit/{event} { allow read: if developer(); allow write: if false; }
-    match /integrityReports/{event} { allow read: if developer(); allow write: if false; }
-    match /runtimeConfig/{config} { allow read: if signedIn(); allow write: if false; }
+    match /developerCodes/{code} {
+      allow get: if signedIn();
+      allow list,delete: if false;
+      allow create: if ownerDeveloper() && code.matches('[a-f0-9]{64}') && request.resource.data.keys().hasOnly(['kind','issuedBy','at','expiresAt']) && request.resource.data.kind == 'helper' && request.resource.data.issuedBy == request.auth.uid && request.resource.data.expiresAt <= request.time.toMillis()+2592000000;
+      allow update: if signedIn() && resource.data.get('usedBy','') == '' && resource.data.get('expiresAt',4102444800000) >= request.time.toMillis() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedBy','usedAt']) && request.resource.data.usedBy == request.auth.uid && getAfter(/databases/$(database)/documents/developers/$(request.auth.uid)).data.grantHash == code;
+    }
+    match /developerSystem/{state} {
+      allow read,create,delete: if false;
+      allow update: if state == 'root' && signedIn() && resource.data.get('uid','') == '' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['uid','claimedAt','claimHash']) && request.resource.data.uid == request.auth.uid && getAfter(/databases/$(database)/documents/developers/$(request.auth.uid)).data.kind == 'owner' && getAfter(/databases/$(database)/documents/developers/$(request.auth.uid)).data.grantHash == request.resource.data.claimHash && claimedCode(request.resource.data.claimHash);
+    }
+    match /developerAudit/{event} { allow read: if developer(); allow create: if developer() && request.resource.data.uid == request.auth.uid; allow update,delete: if false; }
+    match /integrityReports/{event} { allow read: if developer(); allow create: if signedIn() && request.resource.data.uid == request.auth.uid; allow update,delete: if false; }
+    match /runtimeConfig/{config} { allow read: if signedIn(); allow create: if developer() && config == 'probabilities' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.revision == 1; allow update: if developer() && config == 'probabilities' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.revision == resource.data.revision+1; allow delete: if false; }
     match /rankTitles/{snapshot} { allow read: if signedIn(); allow write: if false; }
     match /rankTitleSeasons/{week} { allow read,write: if false; }
     match /weeklyAwards/{uid}/items/{award} { allow read: if owner(uid) && !everDeveloper(uid); allow write: if false; }
@@ -24,16 +43,16 @@ service cloud.firestore {
       allow get: if owner(uid) || developer();
       allow list: if developer();
       allow create: if owner(uid) && notBlocked(uid) && validSave() && request.resource.data.rev > 0;
-      allow update: if owner(uid) && notBlocked(uid) && validSave() && request.resource.data.rev > resource.data.rev;
+      allow update: if (owner(uid) && notBlocked(uid) || ownerDeveloper()) && validSave() && request.resource.data.rev > resource.data.rev;
       allow delete: if false;
     }
     match /rankings/{uid} {
       allow read: if signedIn();
       allow create, update: if owner(uid) && notBlocked(uid) && rankEligible(uid) && request.resource.data.id is string && request.resource.data.get('dbg',0)==0;
-      allow delete: if false;
+      allow delete: if ownerDeveloper() || owner(uid) && existsAfter(/databases/$(database)/documents/developers/$(uid));
     }
-    match /sanctions/{uid} { allow get: if owner(uid)||developer(); allow list: if developer(); allow write: if false; }
-    match /coupons/{code} { allow get: if signedIn(); allow list: if developer(); allow write: if false; }
+    match /sanctions/{uid} { allow get: if owner(uid)||developer(); allow list: if developer(); allow create,update: if ownerDeveloper() && request.resource.data.by == request.auth.uid; allow delete: if false; }
+    match /coupons/{code} { allow get: if signedIn(); allow list: if developer(); allow create: if developer() && request.resource.data.createdBy == request.auth.uid; allow update,delete: if false; }
     match /audit/{record} {
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.snap is string && request.resource.data.at is int;
       allow get,list: if developer() || signedIn() && resource.data.uid == request.auth.uid;

@@ -1,5 +1,6 @@
+import {growthCap} from '../config/growth-limits.js';
 // Reconstructed from the public 2026-10-23 distribution; see docs/PROVENANCE.md.
-import {CHARACTER_LIST, data_ve, getAwakeningCost, CHARACTERS, AWAKENING_MAX, awakenHero, data_G0, getHeroLevelCost, data_pt, data_ut, data_Ie, getSkillMasteryCost, data__0, data_Ne, getWeaponEnhanceCost, WEAPONS, data_x0, craftableWeapons, craftWeapon, data_$0, canCraftWeapon, getCraftCost, data_yr, data_a0, data_eo, data_so, data_Nr, data_Gr, data_We, data_se, data_w0, data_dt, data_nt, data_ft, data_y0, data_rt, data_ot, data_lt, data_it} from "../game-data.js";
+import {CHARACTER_LIST, data_ve, getAwakeningCost, CHARACTERS, AWAKENING_MAX, awakenHero, getHeroLevelCost, data_pt, data_ut, getSkillMasteryCost, data__0, data_Ne, getWeaponEnhanceCost, WEAPONS, data_x0, craftableWeapons, craftWeapon, data_$0, canCraftWeapon, getCraftCost, data_yr, data_a0, data_eo, data_so, data_Nr, data_Gr, data_We, data_se, data_w0, data_dt, data_nt, data_ft, data_y0, data_rt, data_ot, data_lt, data_it} from "../game-data.js";
 import {game, runtime_w, runtime_kt, runtime_Ml, runtime_Rn, runtime_ye, drawText, runtime_q, drawItemIcon, runtime_de, runtime_zn, runtime_ua, runtime_Qf, drawBar, runtime_P1, runtime_T1, runtime_Xe} from "../game.js";
 const P = ["레벨", "스킬 숙련", "무기 강화", "무기 제작"], os = ["스킬 1", "스킬 2", "궁극기", "교대"], v = _0x1ab9f4 => Math.round(_0x1ab9f4 * 100) + "%";
 class _s {
@@ -68,8 +69,8 @@ class _s {
     }
     if (_0x4a0874.menu("ok") || _0x3e5d33) {
       const _0x5c26fc = _0x4ee55d[this.sel], _0x486760 = game.save.chars[_0x5c26fc];
-      if (_0x486760.lv >= data_G0) {
-        runtime_w.play("error");
+      if (_0x486760.lv >= growthCap(game.save)) {
+        runtime_w.play("error");game.toast("스토리 한 장을 모두 완료하면 캐릭터·스킬 상한 +10");
         return;
       }
       const _0x47307d = getHeroLevelCost(_0x486760.lv);
@@ -90,7 +91,7 @@ class _s {
     }
     if ((_0x1c4cb0 === "mtrain" && runtime_kt.mouse.click && (_0x5963db = !0), !(_0x51c85.menu("ok") || _0x5963db))) return;
     const _0x4c4494 = CHARACTERS[_0xc933d3], _0x57bd42 = data_pt(game.save, _0xc933d3)[this.slot];
-    if (!data_ut(_0xc933d3, this.slot) || _0x57bd42 >= data_Ie) {
+    if (!data_ut(_0xc933d3, this.slot) || _0x57bd42 >= growthCap(game.save)) {
       runtime_w.play("error");
       return;
     }
@@ -282,12 +283,12 @@ class _s {
     }), drawText(_0x6141cc, _0x152b9f.title + " · " + data_Gr[_0x152b9f.type], 280, 62, {
       "size": 7,
       "color": data_Nr[_0x152b9f.type]
-    }), drawText(_0x6141cc, "레벨 " + _0xda2af1.lv + " / 20", 280, 78, {
+    }), drawText(_0x6141cc, "레벨 " + _0xda2af1.lv + " / " + growthCap(game.save), 280, 78, {
       "size": 9,
       "color": "#ffe080",
       "bold": !0
-    }), drawBar(_0x6141cc, 280, 92, 180, 5, _0xda2af1.lv / data_G0, "#40d0e0"));
-    const _0x501ad5 = Math.min(data_G0, _0xda2af1.lv + 1);
+    }), drawBar(_0x6141cc, 280, 92, 180, 5, _0xda2af1.lv / growthCap(game.save), "#40d0e0"));
+    const _0x501ad5 = Math.min(growthCap(game.save), _0xda2af1.lv + 1);
     if ((drawText(_0x6141cc, "공격력 " + runtime_P1(_0x152b9f.atk, _0xda2af1.lv, 0) + " → " + runtime_P1(_0x152b9f.atk, _0x501ad5, 0), 280, 104, {
       "size": 7,
       "color": "#f0e8d8"
@@ -311,7 +312,7 @@ class _s {
       "color": _0x41f664 < _0xda2af1.aw ? "#ffe080" : "#6a6078",
       "maxW": 186
     }));
-    const _0x2b5ce5 = _0xda2af1.lv >= data_G0, _0x69230b = getHeroLevelCost(_0xda2af1.lv);
+    const _0x2b5ce5 = _0xda2af1.lv >= growthCap(game.save), _0x69230b = getHeroLevelCost(_0xda2af1.lv);
     (runtime_ua(_0x6141cc, 152, 206, 154, 30, _0x2b5ce5 ? "최대 레벨" : "레벨 업", this.bsel === 0, {
       "sub": _0x2b5ce5 ? "" : "영혼 결정 " + _0x69230b + " (보유 " + _0x14323b.crystals + ")",
       "disabled": _0x2b5ce5 || _0x14323b.crystals < _0x69230b,
@@ -336,7 +337,7 @@ class _s {
       "size": 12,
       "color": "#ffffff",
       "bold": !0
-    }), drawText(_0x95b46a, "스킬 숙련 — 단계마다 그 기술 피해 +" + v(data_dt) + ", " + (data_We + 1) + "단계부터 +" + v(data_nt) + " (최대 " + data_Ie + ")", 230, 64, {
+    }), drawText(_0x95b46a, "스킬 숙련 — 단계마다 그 기술 피해 +" + v(data_dt) + ", " + (data_We + 1) + "단계부터 +" + v(data_nt) + " (최대 " + growthCap(game.save) + ")", 230, 64, {
       "size": 6,
       "color": "#a0f0ff",
       "maxW": 236
@@ -356,12 +357,12 @@ class _s {
         "color": _0xd6aeeb ? _0x1dd416 ? "#ffffff" : "#e0d8f0" : "#5a5068",
         "bold": _0x1dd416,
         "maxW": 120
-      }), drawBar(_0x95b46a, 282, _0x47c49b + 10, 40, 4, _0x2afa65 / data_Ie, "#40d0e0"), drawText(_0x95b46a, _0x2afa65 + "/" + data_Ie, 302, _0x47c49b + 15, {
+      }), drawBar(_0x95b46a, 282, _0x47c49b + 10, 40, 4, _0x2afa65 / growthCap(game.save), "#40d0e0"), drawText(_0x95b46a, _0x2afa65 + "/" + growthCap(game.save), 302, _0x47c49b + 15, {
         "size": 5,
         "align": "center",
         "color": "#a0f0ff"
       }), !_0xd6aeeb)) continue;
-      const _0x22c07b = _0x2afa65 >= data_Ie;
+      const _0x22c07b = _0x2afa65 >= growthCap(game.save);
       drawText(_0x95b46a, _0x22c07b ? "피해 +" + v(data_ft(_0x2afa65)) : "피해 +" + v(data_ft(_0x2afa65)) + " → +" + v(data_ft(_0x2afa65 + 1)), 338, _0x47c49b + 8, {
         "size": 6,
         "color": _0x2afa65 ? "#ffe080" : "#c8c0d8"
@@ -373,7 +374,7 @@ class _s {
         "color": _0x22c07b ? "#80ff80" : _0x1ba787.crystals >= _0x61936a ? "#a0f0ff" : "#806070"
       });
     }
-    const _0x332e55 = data_ut(_0x6d6f82, this.slot), _0xba312a = _0x2ca928[this.slot], _0x5abcfa = _0xba312a >= data_Ie, _0x47eb52 = getSkillMasteryCost(_0x281f57.rarity, _0xba312a), _0x47d268 = _0x332e55 ? _0x5abcfa ? "최대 숙련" : os[this.slot] + " 숙련 (" + _0xba312a + " → " + (_0xba312a + 1) + ")" : "숙련 불가";
+    const _0x332e55 = data_ut(_0x6d6f82, this.slot), _0xba312a = _0x2ca928[this.slot], _0x5abcfa = _0xba312a >= growthCap(game.save), _0x47eb52 = getSkillMasteryCost(_0x281f57.rarity, _0xba312a), _0x47d268 = _0x332e55 ? _0x5abcfa ? "최대 숙련" : os[this.slot] + " 숙련 (" + _0xba312a + " → " + (_0xba312a + 1) + ")" : "숙련 불가";
     (runtime_ua(_0x95b46a, 160, 206, 300, 30, _0x47d268, !0, {
       "sub": !_0x332e55 || _0x5abcfa ? "" : "영혼 결정 " + _0x47eb52 + " (보유 " + _0x1ba787.crystals + ")",
       "disabled": !_0x332e55 || _0x5abcfa || _0x1ba787.crystals < _0x47eb52,

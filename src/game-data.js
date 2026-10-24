@@ -1,3 +1,4 @@
+import {growthCap,MAX_GROWTH_CAP,migrateGrowth} from './config/growth-limits.js';
 import {WEEKLY_CATEGORIES,updateRecord,makeRankTitles} from './config/ranking-rules.js';
 import {canSelectTitle} from './systems/rank-titles.js';
 import {getProbabilities} from './config/live-rules.js';
@@ -31698,7 +31699,7 @@ function x0(_0x15509d, _0x5c8f82) {
   const _0x118b5d = ct(_0x40769b.rarity, _0x3bcc0d);
   return _0x15509d.crystals < _0x118b5d ? !1 : (_0x15509d.crystals -= _0x118b5d, _0x252c0e.en = _0x3bcc0d + 1, !0);
 }
-const Ie = 50, dt = 0.06, nt = 0.02;
+const Ie = MAX_GROWTH_CAP, dt = 0.06, nt = 0.02;
 function ft(_0x31d92f) {
   const _0x43ccd = {
     YloQp: function (_0x3c1388, _0x177b1f) {
@@ -31731,7 +31732,7 @@ function _0(_0xb3373d, _0xce6125, _0x3ebf4a) {
   }, _0x103a7d = T[_0xce6125], _0x42c560 = _0xb3373d.chars[_0xce6125];
   if (!_0x103a7d || !_0x42c560 || _0x3ebf4a < 0 || _0x3ebf4a > 3 || !ut(_0xce6125, _0x3ebf4a)) return !1;
   const _0x5aa82d = pt(_0xb3373d, _0xce6125);
-  if (_0x5aa82d[_0x3ebf4a] >= Ie) return !1;
+  if (_0x5aa82d[_0x3ebf4a] >= growthCap(_0xb3373d)) return !1;
   const _0x35a37d = ht(_0x103a7d.rarity, _0x5aa82d[_0x3ebf4a]);
   return _0xb3373d.crystals < _0x35a37d ? !1 : (_0xb3373d.crystals -= _0x35a37d, _0x5aa82d[_0x3ebf4a]++, _0x42c560.sk = _0x5aa82d, !0);
 }
@@ -38368,6 +38369,8 @@ function kr() {
   const _0x61de7c = {};
   return (_0x61de7c.chars = [pe, ""], _0x61de7c.weapon = ue, {
     "v": 1,
+    "growthVersion": 1,
+    "growthNoticeCap": 10,
     "stones": 800,
     "crystals": 500,
     "awShards": 0,
@@ -38495,6 +38498,7 @@ function z0(_0x4610df) {
     ..._0x190aac,
     ..._0x2f3d58,
     "v": 1,
+    "growthVersion": _0x2f3d58.growthVersion ?? 0,
     "pity": {
       ..._0x190aac.pity,
       ..._0x2f3d58.pity ?? ({})
@@ -38554,7 +38558,7 @@ function z0(_0x4610df) {
     "pickupOverride": br(_0x2f3d58.pickupOverride)
   };
   for (const _0x50d74a of [_0x2954a7.yGHpN, "crystals", "awShards", "compass", "curse", "curseMax", "pickupIndex", "themeIndex", "runsSinceRotation", _0x2954a7.hNTdp, _0x2954a7.Qkmpe, _0x2954a7.hVgbg]) (typeof _0x54510e[_0x50d74a] != "number" || !Number.isFinite(_0x54510e[_0x50d74a])) && (_0x54510e[_0x50d74a] = _0x190aac[_0x50d74a]);
-  return (_0x54510e.storyMax = Math.max(1, Math.min(E.length, Math.floor(_0x54510e.storyMax))), _0x54510e.story = Math.max(1, Math.min(_0x54510e.storyMax, Math.floor(_0x54510e.story))), va(_0x54510e, Math.floor(_0x54510e.book)) || (_0x54510e.book = 1), bt(_0x54510e), pr(_0x54510e), _0x54510e);
+  return (_0x54510e.storyMax = Math.max(1, Math.min(E.length, Math.floor(_0x54510e.storyMax))), _0x54510e.story = Math.max(1, Math.min(_0x54510e.storyMax, Math.floor(_0x54510e.story))), va(_0x54510e, Math.floor(_0x54510e.book)) || (_0x54510e.book = 1), bt(_0x54510e), pr(_0x54510e), migrateGrowth(_0x54510e), _0x54510e);
 }
 function L0(level) {
   return heroLevelCost(level);
@@ -38563,7 +38567,7 @@ const _0xf3d234 = {
   apiKey: globalThis.CONTRACT_CONFIG?.firebase?.apiKey ?? "",
   projectId: globalThis.CONTRACT_CONFIG?.firebase?.projectId ?? ""
 };
-const G0 = 20, wr = 5, yr = 5, N0 = _0xf3d234;
+const G0 = MAX_GROWTH_CAP, wr = 5, yr = 5, N0 = _0xf3d234;
 function vr() {
   try {
     return globalThis.localStorage?.getItem("pact_force_local") === "1";

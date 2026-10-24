@@ -1,0 +1,1 @@
+{"private":true,"type":"module","scripts":{"test":"cd ../.. && tests/firebase/node_modules/.bin/firebase emulators:exec --only firestore --project demo-soul --config firebase.emulator.json \"node tests/firebase/rules.emulator.mjs\""},"devDependencies":{"@firebase/rules-unit-testing":"^5.0.0","firebase":"^12.0.0","firebase-tools":"13.35.1"}}

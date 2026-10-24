@@ -5,10 +5,10 @@ import * as data from '../src/game-data.js';
 import { createRunSettlement } from '../src/systems/progression.js';
 
 test('growth prices are monotonic, bounded, and shared with the real game', () => {
-  for (const [fn, count] of [[weaponEnhanceCost, 50], [skillMasteryCost, 50], [heroLevelCost, 19]]) {
+  for (const [fn, count] of [[weaponEnhanceCost, 50], [skillMasteryCost, 50], [heroLevelCost, 49]]) {
     const costs = Array.from({ length: count }, (_, i) => fn(i + 1));
     assert.ok(costs.every((price, i) => Number.isInteger(price) && price > 0 && (!i || price >= costs[i - 1])));
-    assert.ok(costs.reduce((a, b) => a + b, 0) < 100000);
+    assert.ok(costs.reduce((a, b) => a + b, 0) < 800000);
   }
   for (const rarity of [3, 4, 5, 6, 7]) {
     assert.equal(data.data_Me[rarity], data.getAwakeningCost(rarity, 0));

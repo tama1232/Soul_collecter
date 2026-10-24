@@ -669,7 +669,7 @@ class N {
         "align": "center",
         "color": runtime_Rn[6],
         "maxW": _0x5c5ff7
-      })), drawText(_0x3020b6, "일요일 세 부문 1위에게 별의 나침반 각 2개", 116, 182, {
+      })), drawText(_0x3020b6, "일요일 네 부문 1위에게 별의 나침반 각 2개", 116, 182, {
         "size": 6,
         "color": "#a8a0c0"
       }));

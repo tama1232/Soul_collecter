@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 .env*
 !.env.example
 *.log
@@ -7,3 +7,8 @@ node_modules/
 dist/
 
 functions/bootstrap-owner.json
+
+archive-data/
+*.pem
+*.soul
+gha-creds-*.json

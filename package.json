@@ -1,6 +1,6 @@
 {
   "name": "contract-reborn",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Soul collecter — modular Canvas action roguelite",

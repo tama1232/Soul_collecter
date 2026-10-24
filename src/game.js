@@ -1,3 +1,4 @@
+import {growthNotice} from './config/growth-limits.js';
 import {rankingRow,sortRanking,compareRecords,ALL_TIME_CATEGORIES} from './config/ranking-rules.js';
 import {fetchRankTitles,setRankTitleSnapshot} from './systems/rank-titles.js';
 import {developerService} from './systems/developer-service.js';
@@ -6077,6 +6078,7 @@ class GameApp {
   persist() {
     if (!accountStore.session) return;
     this.hasSave = !0;
+    const capNotice=growthNotice(this.save);if(capNotice)this.toast(capNotice,"#80f0ff");
     data_st(this.save,ta());
     if(developerService.authorized){this.save.developerRole=developerService.role.kind;this.save.rankBan=true;this.save.dbg=true;}
     const _0x12ec95 = en(this.save);

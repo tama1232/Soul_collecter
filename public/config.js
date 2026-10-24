@@ -5,6 +5,7 @@ window.CONTRACT_CONFIG = Object.freeze({
   emailDomain: "players.star-ledger.invalid",
   // 계정/저장/랭킹은 사용 가능. Functions 배포 후 true로 전환합니다.
   functionsEnabled: false,
+  developerBackend: "spark",
   functionsRegion: "asia-northeast3",
   developerShortcut: "Control+Shift+F10",
 });
