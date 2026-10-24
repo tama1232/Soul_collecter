@@ -1,0 +1,272 @@
+{
+  "economyVersion": 3,
+  "assumptions": "All stories cleared, curse 0, no income bonuses; simulated currencies, not measured player time.",
+  "totals": {
+    "heroLevel1To20": 19000,
+    "weapon0To50": 83560,
+    "oneSkill0To50": 64560,
+    "eightStarAwakening0To5": 4250
+  },
+  "trials": [
+    {
+      "book": 1,
+      "cycleLength": 43,
+      "cycles": 1,
+      "bosses": 43,
+      "stones": 7998,
+      "crystals": 39990,
+      "awShards": 344,
+      "mats": [
+        22,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "book": 1,
+      "cycleLength": 43,
+      "cycles": 2,
+      "bosses": 86,
+      "stones": 20395,
+      "crystals": 101975,
+      "awShards": 877,
+      "mats": [
+        45,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "book": 1,
+      "cycleLength": 43,
+      "cycles": 3,
+      "bosses": 129,
+      "stones": 40850,
+      "crystals": 204249,
+      "awShards": 1757,
+      "mats": [
+        67,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "book": 2,
+      "cycleLength": 42,
+      "cycles": 1,
+      "bosses": 42,
+      "stones": 11529,
+      "crystals": 57645,
+      "awShards": 504,
+      "mats": [
+        0,
+        22,
+        0,
+        0
+      ]
+    },
+    {
+      "book": 2,
+      "cycleLength": 42,
+      "cycles": 2,
+      "bosses": 84,
+      "stones": 29399,
+      "crystals": 146995,
+      "awShards": 1285,
+      "mats": [
+        0,
+        44,
+        0,
+        0
+      ]
+    },
+    {
+      "book": 2,
+      "cycleLength": 42,
+      "cycles": 3,
+      "bosses": 126,
+      "stones": 58884,
+      "crystals": 294422,
+      "awShards": 2574,
+      "mats": [
+        0,
+        66,
+        0,
+        0
+      ]
+    },
+    {
+      "book": 3,
+      "cycleLength": 42,
+      "cycles": 1,
+      "bosses": 42,
+      "stones": 16141,
+      "crystals": 80703,
+      "awShards": 672,
+      "mats": [
+        0,
+        0,
+        22,
+        0
+      ]
+    },
+    {
+      "book": 3,
+      "cycleLength": 42,
+      "cycles": 2,
+      "bosses": 84,
+      "stones": 41159,
+      "crystals": 205793,
+      "awShards": 1714,
+      "mats": [
+        0,
+        0,
+        44,
+        0
+      ]
+    },
+    {
+      "book": 3,
+      "cycleLength": 42,
+      "cycles": 3,
+      "bosses": 126,
+      "stones": 82438,
+      "crystals": 412191,
+      "awShards": 3432,
+      "mats": [
+        0,
+        0,
+        66,
+        0
+      ]
+    },
+    {
+      "book": 4,
+      "cycleLength": 42,
+      "cycles": 1,
+      "bosses": 42,
+      "stones": 21521,
+      "crystals": 107604,
+      "awShards": 924,
+      "mats": [
+        0,
+        0,
+        0,
+        22
+      ]
+    },
+    {
+      "book": 4,
+      "cycleLength": 42,
+      "cycles": 2,
+      "bosses": 84,
+      "stones": 54878,
+      "crystals": 274390,
+      "awShards": 2356,
+      "mats": [
+        0,
+        0,
+        0,
+        44
+      ]
+    },
+    {
+      "book": 4,
+      "cycleLength": 42,
+      "cycles": 3,
+      "bosses": 126,
+      "stones": 109917,
+      "crystals": 549587,
+      "awShards": 4719,
+      "mats": [
+        0,
+        0,
+        0,
+        66
+      ]
+    }
+  ],
+  "cycles": [
+    {
+      "cycle": 1,
+      "enemy": 1,
+      "reward": 1,
+      "skillCooldown": 0
+    },
+    {
+      "cycle": 2,
+      "enemy": 1.45,
+      "reward": 1.55,
+      "skillCooldown": 0.5
+    },
+    {
+      "cycle": 3,
+      "enemy": 2.2185,
+      "reward": 2.5575,
+      "skillCooldown": 1
+    },
+    {
+      "cycle": 4,
+      "enemy": 3.5717849999999998,
+      "reward": 4.475625,
+      "skillCooldown": 1.5
+    },
+    {
+      "cycle": 5,
+      "enemy": 6.03631665,
+      "reward": 8.27990625,
+      "skillCooldown": 2
+    },
+    {
+      "cycle": 6,
+      "enemy": 10.6842804705,
+      "reward": 16.1458171875,
+      "skillCooldown": 2.5
+    },
+    {
+      "cycle": 7,
+      "enemy": 19.765918870425,
+      "reward": 33.098925234374995,
+      "skillCooldown": 3
+    },
+    {
+      "cycle": 8,
+      "enemy": 38.14822341992025,
+      "reward": 71.16268925390625,
+      "skillCooldown": 3.5
+    }
+  ],
+  "commonPrices": [
+    {
+      "level": 0,
+      "nextPrice": 300
+    },
+    {
+      "level": 10,
+      "nextPrice": 970
+    },
+    {
+      "level": 30,
+      "nextPrice": 13480
+    },
+    {
+      "level": 50,
+      "nextPrice": 267060
+    },
+    {
+      "level": 100,
+      "nextPrice": 2255530430
+    },
+    {
+      "level": 200,
+      "nextPrice": 137412570253402420000
+    },
+    {
+      "level": 300,
+      "nextPrice": 6.783511613473149e+34
+    }
+  ]
+}

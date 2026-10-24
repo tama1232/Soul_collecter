@@ -1,0 +1,12 @@
+{
+  "originalDistributionVersion": "mvks3w6m",
+  "originalJsFiles": 26,
+  "reconstructedJsFiles": 41,
+  "originalJsBytes": 8552255,
+  "reconstructedJsBytes": 3073242,
+  "originalJsGzipBytes": 4324185,
+  "reconstructedJsGzipBytes": 771074,
+  "extractedPngBytes": 2999451,
+  "note": "JS source/transfer size comparison only; each JS file gzipped independently. PNGs load separately. Features were added after reconstruction. No measured frame-rate speedup.",
+  "reconstructedVersion": "soul-collecter-0.4.0"
+}

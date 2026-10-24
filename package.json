@@ -1,0 +1,14 @@
+{
+  "name": "contract-reborn",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "Soul collecter — modular Canvas action roguelite",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "simulate": "node scripts/simulate-economy.mjs"
+  },
+  "engines": { "node": ">=22" }
+}

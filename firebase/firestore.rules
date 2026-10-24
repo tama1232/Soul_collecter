@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    function developer() { return signedIn() && exists(/databases/$(database)/documents/developers/$(request.auth.uid)) && get(/databases/$(database)/documents/developers/$(request.auth.uid)).data.get('enabled', false) == true; }
+    function everDeveloper(uid) { return exists(/databases/$(database)/documents/developers/$(uid)); }
+    function notBlocked(uid) { return !exists(/databases/$(database)/documents/sanctions/$(uid)) || get(/databases/$(database)/documents/sanctions/$(uid)).data.get('block', false) != true; }
+    function rankEligible(uid) { return !everDeveloper(uid) && (!exists(/databases/$(database)/documents/sanctions/$(uid)) || get(/databases/$(database)/documents/sanctions/$(uid)).data.get('rankBan', false) != true); }
+    function validSave() {
+      return request.resource.data.keys().hasOnly(['id','data','updated','rev','sid']) && request.resource.data.id is string && request.resource.data.id.size() <= 16 && request.resource.data.data is string && request.resource.data.data.size() < 700000 && request.resource.data.updated is int && request.resource.data.rev is int && request.resource.data.sid is string;
+    }
+    match /developers/{uid} { allow get: if owner(uid); allow list, write: if false; }
+    match /admins/{uid} { allow read, write: if false; }
+    match /developerCodes/{code} { allow read, write: if false; }
+    match /developerSystem/{state} { allow read, write: if false; }
+    match /developerAudit/{event} { allow read: if developer(); allow write: if false; }
+    match /integrityReports/{event} { allow read: if developer(); allow write: if false; }
+    match /runtimeConfig/{config} { allow read: if signedIn(); allow write: if false; }
+    match /weeklyAwards/{uid}/items/{award} { allow read: if owner(uid) && !everDeveloper(uid); allow write: if false; }
+    match /saves/{uid} {
+      allow get: if owner(uid) || developer();
+      allow list: if developer();
+      allow create: if owner(uid) && notBlocked(uid) && validSave() && request.resource.data.rev > 0;
+      allow update: if owner(uid) && notBlocked(uid) && validSave() && request.resource.data.rev > resource.data.rev;
+      allow delete: if false;
+    }
+    match /rankings/{uid} {
+      allow read: if signedIn();
+      allow create, update: if owner(uid) && notBlocked(uid) && rankEligible(uid) && request.resource.data.id is string && request.resource.data.get('dbg',0)==0;
+      allow delete: if false;
+    }
+    match /sanctions/{uid} { allow get: if owner(uid)||developer(); allow list: if developer(); allow write: if false; }
+    match /coupons/{code} { allow get: if signedIn(); allow list: if developer(); allow write: if false; }
+    match /audit/{record} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid && request.resource.data.snap is string && request.resource.data.at is int;
+      allow get,list: if developer() || signedIn() && resource.data.uid == request.auth.uid;
+      allow update,delete: if false;
+    }
+    match /flags/{record} { allow create: if signedIn() && request.resource.data.uid == request.auth.uid; allow read: if developer(); allow update,delete: if false; }
+    match /{document=**} { allow read,write: if false; }
+  }
+}
