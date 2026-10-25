@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {GAME_VERSION} from '../src/config/version.js';
 
 // Application-level smoke test with an inert DOM/Canvas interface. No layout,
 // pixels, browser engine, network session, or visual fidelity is emulated.
@@ -28,7 +29,7 @@ function environment() {
   globalThis.matchMedia = () => ({ matches: false, addEventListener() {} });
   globalThis.requestAnimationFrame = () => 1; globalThis.cancelAnimationFrame = () => {};
   globalThis.Image = class { width = 160; height = 96; set src(value) { this.url = value; queueMicrotask(() => this.onload?.()); } };
-  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: 'soul-collecter-0.7.1' }), headers: new Headers() });
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ id: GAME_VERSION }), headers: new Headers() });
   const originalInterval = globalThis.setInterval;
   globalThis.setInterval = (...args) => { const timer = originalInterval(...args); timer.unref(); return timer; };
   globalThis.CONTRACT_CONFIG = { firebase: { apiKey: '', projectId: '' } };
@@ -161,6 +162,48 @@ test('real game modules boot, create an independent local account, save and rend
   for(const id of ['caelus','elin','solen','lucas','astral','hanbyeol','enoch','ashen','luciel','arien','aurel','vega','flora','gambler','lumien','jax','baekya','heukwol']) {
     const asset=runtime.loadSpriteAsset(id);await asset.promise;assert.equal(asset.status,'ready',id);
   }
+  const {CHARACTER_ART}=await import('../src/config/character-art.js');
+  for(const id of Object.keys(CHARACTER_ART)) {
+    const asset=runtime.loadSpriteAsset(id);await asset.promise;
+    assert.equal(asset.status,'ready',id);assert.equal(asset.d.sheet,CHARACTER_ART[id].sheet,id);
+  }
+  const shotDefinition={spr:'arrow',spd:6,life:60,w:14,h:4,col:'#a0ff80'};
+  const artShot=room.addProj('player',shotDefinition,player.cx,player.cy,0,1,'normal');
+  const sourceHero=player.def.id;assert.equal(artShot.artId,sourceHero);
+  const beforeDrawing={x:artShot.x,y:artShot.y,vx:artShot.vx,vy:artShot.vy,life:artShot.life};
+  const previousActive=room.run.active;room.run.active=1-previousActive;artShot.render(app.r.w,0,0,0);
+  assert.equal(artShot.artId,sourceHero);
+  assert.deepEqual({x:artShot.x,y:artShot.y,vx:artShot.vx,vy:artShot.vy,life:artShot.life},beforeDrawing);
+  assert.equal(artShot.def,shotDefinition);room.run.active=previousActive;
+  // Exercise Nemea's actual dispatcher, signature modifiers and proc cooldowns.
+  const previousSave=app.save,nemeaSave=data.createSave();
+  nemeaSave.chars.anima={lv:1,aw:0,count:1,sk:[0,0,0,0]};
+  nemeaSave.weapons.nemea_requiem={rf:1,count:1};
+  nemeaSave.loadout={chars:['anima',''],weapon:'nemea_requiem'};app.save=nemeaSave;
+  const nemeaScene=new RunScene(new data.RunState(nemeaSave,123));nemeaScene.enter();
+  const nr=nemeaScene.room,np=nr.player;nr.god=true;nr.input={};
+  const shots=[],spawn=nr.addProj.bind(nr);
+  nr.addProj=(...args)=>{const projectile=spawn(...args);shots.push(projectile);return projectile;};
+  np.state='normal';np.skillCd=[0,0];
+  const expectedCooldown=Math.max(1,(np.def.skills[0].cd-nr.build.modFor('skill1').cd)*(1-Math.min(.7,nr.stats.cdr??0)))-.5;
+  assert.equal(np.tryAction('skill1'),true);assert.ok(Math.abs(np.skillCd[0]-expectedCooldown)<1e-9);
+  for(let tick=0;tick<32;tick++)nr.step();
+  const castShots=shots.filter(shot=>shot.kind==='skill');assert.equal(castShots.length,12);
+  assert.ok(castShots.every(shot=>shot.mult>=6*1.6-1e-9&&shot.def.ghost&&shot.artId==='anima'));
+  np.endAct();np.state='normal';np.skillCd=[0,0];nr.run.hp=Math.round(nr.maxHp()*.2);nr.run.shield=0;
+  assert.equal(np.tryAction('skill2'),true);for(let tick=0;tick<30;tick++)nr.step();
+  assert.ok(nr.run.hp>=nr.maxHp()*.59);assert.ok(nr.run.shield>=nr.maxHp()*.69);
+  assert.ok(nr.build.buffs.has('nemea_sanctuary'));
+  assert.ok(nr.fields.some(field=>field.def.follow&&field.def.life===360&&field.def.tick===30));
+  np.endAct();np.state='normal';np.ultCd=0;nr.run.hp=1;nr.run.shield=0;
+  assert.equal(np.tryAction('ult'),true);assert.equal(nr.run.hp,nr.maxHp());assert.equal(nr.run.shield,nr.maxHp());
+  const ultimateShots=shots.length;for(let tick=0;tick<86;tick++)nr.step();
+  assert.equal(shots.slice(ultimateShots).filter(shot=>shot.kind==='skill').length,32);
+  let beforeProc=shots.length;nr.build.fire('hit',{},()=>.5);assert.equal(shots.length-beforeProc,3);
+  beforeProc=shots.length;nr.build.fire('hit',{},()=>.5);assert.equal(shots.length,beforeProc);
+  nr.build.time+=.61;nr.build.fire('hit',{},()=>.5);assert.equal(shots.length-beforeProc,3);
+  assert.ok(shots.slice(-3).every(shot=>shot.kind==='proc'));
+  app.save=previousSave;
   // An imported save flag must never grant debug or operator capabilities.
   app.save.developerRole='owner';app.setDebug(true);assert.equal(app.debug,false);
   const {installDeveloperConsole}=await import('../src/features/developer-console.js');

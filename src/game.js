@@ -14,6 +14,9 @@ import {RELIC_MAX_LEVEL, capRelics, rushCycle, rushCooldown, hiddenBossChance, H
 import {rollCompassRarity} from './config/economy.js';
 import {claimCloudAwards} from './systems/weekly.js';
 import {SPRITE_LAYOUT} from './config/sprites.js';
+import {resolveSpriteFrame, spriteGeometry} from './engine/sprite-animation.js';
+import {CHARACTER_ART} from './config/character-art.js';
+import {drawCharacterProjectile} from './engine/projectile-art.js';
 import {createRunSettlement} from './systems/progression.js';
 import {GameRenderer, stageTransform as Fe, createCanvas as pa} from './engine/renderer.js';
 import {FixedStepLoop} from "./engine/loop.js";
@@ -5562,6 +5565,11 @@ const Lc = {
   "hanbyeol": !0,
   "elin": !0
 }, xo = {};
+// Keep existing dedicated spell atlases while replacing character art from the upload.
+for (const [id, definition] of Object.entries(CHARACTER_ART)) {
+  const original = fn[id];
+  fn[id] = async () => ({...(original ? await original() : {fx:{}}), ...definition});
+}
 function loadSpriteAsset(id) {
   if (!fn[id]) return null;
   let asset = xo[id];
@@ -5611,38 +5619,13 @@ function loadSpriteAsset(id) {
   }
   return asset;
 }
-function resolveSpriteFrame(_0xe8110, _0x579974, _0x302f36) {
-  const _0x3b253e = _0xe8110.d, _0x5f0c2f = _0x3b253e.poses[_0x579974] ?? "idle0";
-  if (!_0x302f36) return _0x5f0c2f;
-  const _0x516283 = (_0x50b196, _0x24f51d, _0x4891ef = !0) => {
-    const _0x4f2d74 = _0x3b253e.cycles[_0x50b196];
-    if (!_0x4f2d74) return null;
-    const _0x102db9 = Math.floor(_0x24f51d / _0x4f2d74.tick);
-    return _0x4f2d74.frames[_0x4891ef ? _0x102db9 % _0x4f2d74.frames.length : Math.min(_0x102db9, _0x4f2d74.frames.length - 1)];
-  };
-  if (_0x579974 === "idle0" || _0x579974 === "idle1") return Math.floor(_0x302f36.t / 40) % 2 ? "idle0~b" : "idle0";
-  if (_0x579974.startsWith("run")) return _0x516283("run", _0x302f36.t) ?? _0x5f0c2f;
-  if (_0x579974 === "hurt") return _0x516283("hurt", _0x302f36.since, !1) ?? _0x5f0c2f;
-  if (_0x579974 === "dead") return _0x516283("dead", _0x302f36.since, !1) ?? _0x5f0c2f;
-  if (_0x302f36.prev && _0x302f36.since < 2) {
-    const _0x3bf6a0 = (/^([a-z]+)(\d)$/).exec(_0x5f0c2f), _0x49b99a = (/^([a-z]+)(\d)$/).exec(_0x3b253e.poses[_0x302f36.prev] ?? "");
-    if (_0x3bf6a0 && _0x49b99a && _0x3bf6a0[1] === _0x49b99a[1] && +_0x3bf6a0[2] == +_0x49b99a[2] + 1) {
-      const _0x177f25 = _0x49b99a[0] + "_" + _0x3bf6a0[2];
-      if (_0x3b253e.frames[_0x177f25]) return _0x177f25;
-    }
-  }
-  return _0x5f0c2f;
-}
 function rasterizeSpriteFrame(_0x6fa33a, _0x2acbae, _0x40f955) {
-  const _0x249b5d = _0x2acbae.endsWith("~b"), _0x4010af = _0x6fa33a.d.frames[_0x249b5d ? _0x2acbae.slice(0, -2) : _0x2acbae] ?? _0x6fa33a.d.frames.idle0, _0x41ecb0 = document.createElement("canvas");
-  (_0x41ecb0.width = _0x40f955, _0x41ecb0.height = Cs);
+  const _0x4010af = _0x6fa33a.d.frames[_0x2acbae] ?? _0x6fa33a.d.frames.idle0, _0x41ecb0 = document.createElement("canvas");
+  (_0x41ecb0.width = _0x40f955, _0x41ecb0.height = _0x40f955 === SPRITE_LAYOUT.fullWidth ? _0x6fa33a.d.outputHeight ?? Cs : Cs);
   const _0x46b555 = _0x41ecb0.getContext("2d");
   _0x46b555.imageSmoothingEnabled = !1;
-  const _0x2ae352 = _0x40f955 / 2 - _0x4010af.ax, _0x3db5f1 = Qs - _0x4010af.ay;
-  if (!_0x249b5d) _0x46b555.drawImage(_0x6fa33a.img, _0x4010af.x, _0x4010af.y, _0x4010af.w, _0x4010af.h, _0x2ae352, _0x3db5f1, _0x4010af.w, _0x4010af.h); else {
-    const _0x2bc13c = Math.round(_0x4010af.h * 0.58);
-    (_0x46b555.drawImage(_0x6fa33a.img, _0x4010af.x, _0x4010af.y + _0x2bc13c, _0x4010af.w, _0x4010af.h - _0x2bc13c, _0x2ae352, _0x3db5f1 + _0x2bc13c, _0x4010af.w, _0x4010af.h - _0x2bc13c), _0x46b555.drawImage(_0x6fa33a.img, _0x4010af.x, _0x4010af.y, _0x4010af.w, _0x2bc13c, _0x2ae352, _0x3db5f1 + 1, _0x4010af.w, _0x2bc13c));
-  }
+  const destination = spriteGeometry(_0x6fa33a.d, _0x4010af, _0x40f955, Qs);
+  _0x46b555.drawImage(_0x6fa33a.img, _0x4010af.x, _0x4010af.y, _0x4010af.w, _0x4010af.h, destination.x, destination.y, destination.w, destination.h);
   return _0x41ecb0;
 }
 const Zc = {
@@ -5652,7 +5635,7 @@ function getCharacterSprite(_0x55f44e, _0x150fa1, _0x218251, _0x5e9ea3 = !1) {
   const _0x4ca8c4 = loadSpriteAsset(_0x55f44e), _0x16680a = Zc[_0x55f44e];
   if (!_0x4ca8c4) return Vc(_0x55f44e, _0x150fa1);
   if (!_0x4ca8c4.ok) return _0x16680a ? _0x16680a(_0x150fa1 === "dead" ? "hurt" : _0x150fa1) : null;
-  const _0x523049 = resolveSpriteFrame(_0x4ca8c4, _0x150fa1, _0x218251), _0x1eeb1d = _0x5e9ea3 ? _0x4ca8c4.w : Cs, _0x13ef58 = _0x55f44e + "|" + _0x523049 + "|" + _0x1eeb1d;
+  const _0x523049 = resolveSpriteFrame(_0x4ca8c4.d, _0x150fa1, _0x218251), _0x1eeb1d = _0x5e9ea3 ? _0x4ca8c4.w : Cs, _0x13ef58 = _0x55f44e + "|" + _0x523049 + "|" + _0x1eeb1d;
   let _0x17607c = wo.get(_0x13ef58);
   return (_0x17607c || (_0x17607c = rasterizeSpriteFrame(_0x4ca8c4, _0x523049, _0x1eeb1d), wo.set(_0x13ef58, _0x17607c)), _0x17607c);
 }
@@ -5668,7 +5651,7 @@ const Mo = new Map();
 function Qc(_0x30907d, _0x396408) {
   const _0x51a53b = loadSpriteAsset(_0x30907d);
   if (!_0x51a53b || !_0x51a53b.ok) return null;
-  const _0x16e320 = resolveSpriteFrame(_0x51a53b, _0x396408), _0x2e7070 = _0x30907d + "|" + _0x16e320;
+  const _0x16e320 = resolveSpriteFrame(_0x51a53b.d, _0x396408), _0x2e7070 = _0x30907d + "|" + _0x16e320;
   let _0x8023d3 = Mo.get(_0x2e7070);
   if (!_0x8023d3) {
     const _0x2dd2d0 = getCharacterSprite(_0x30907d, _0x396408);
@@ -5681,7 +5664,7 @@ function Qc(_0x30907d, _0x396408) {
   }
   return _0x8023d3;
 }
-const Bc = _0x3eeadd => !!fn[_0x3eeadd], De = [], ea = {
+const Bc = _0x3eeadd => !!fn[_0x3eeadd] && !CHARACTER_ART[_0x3eeadd], De = [], ea = {
   "off": !1
 };
 function Ac(_0x389363) {
@@ -5737,7 +5720,8 @@ function flushSpriteLayer(_0x2d6cc3, _0x1362b5, _0x7090a9) {
           _0x36e4e0.flip ? (_0x2d6cc3.translate(_0x36e4e0.x + _0x4cc8df / 2, _0x36e4e0.y), _0x2d6cc3.scale(-1, 1), _0x2d6cc3.drawImage(_0x36e4e0.img, -_0x4cc8df / 2, 0, _0x4cc8df, _0x5473ef)) : _0x2d6cc3.drawImage(_0x36e4e0.img, _0x36e4e0.x, _0x36e4e0.y, _0x4cc8df, _0x5473ef);
         } else {
           const _0x2b1fe8 = _0x36e4e0.img.width / 2, _0x3f6862 = (_0x2b1fe8 - 48) / 2;
-          _0x36e4e0.rot ? (_0x2d6cc3.translate(_0x36e4e0.x + _0x36e4e0.rot.ox, _0x36e4e0.y + _0x36e4e0.rot.oy), _0x2d6cc3.rotate(_0x36e4e0.rot.a), _0x36e4e0.flip && _0x2d6cc3.scale(-1, 1), _0x2d6cc3.drawImage(_0x36e4e0.img, -24 - _0x3f6862, -38, _0x2b1fe8, 48)) : _0x36e4e0.flip ? (_0x2d6cc3.translate(_0x36e4e0.x + 24, _0x36e4e0.y), _0x2d6cc3.scale(-1, 1), _0x2d6cc3.drawImage(_0x36e4e0.img, -24 - _0x3f6862, 0, _0x2b1fe8, 48)) : _0x2d6cc3.drawImage(_0x36e4e0.img, _0x36e4e0.x - _0x3f6862, _0x36e4e0.y, _0x2b1fe8, 48);
+          const spriteHeight = _0x36e4e0.img.height / 2;
+          _0x36e4e0.rot ? (_0x2d6cc3.translate(_0x36e4e0.x + _0x36e4e0.rot.ox, _0x36e4e0.y + _0x36e4e0.rot.oy), _0x2d6cc3.rotate(_0x36e4e0.rot.a), _0x36e4e0.flip && _0x2d6cc3.scale(-1, 1), _0x2d6cc3.drawImage(_0x36e4e0.img, -24 - _0x3f6862, -(_0x36e4e0.rot.anchorY ?? 38), _0x2b1fe8, spriteHeight)) : _0x36e4e0.flip ? (_0x2d6cc3.translate(_0x36e4e0.x + 24, _0x36e4e0.y), _0x2d6cc3.scale(-1, 1), _0x2d6cc3.drawImage(_0x36e4e0.img, -24 - _0x3f6862, 0, _0x2b1fe8, spriteHeight)) : _0x2d6cc3.drawImage(_0x36e4e0.img, _0x36e4e0.x - _0x3f6862, _0x36e4e0.y, _0x2b1fe8, spriteHeight);
         }
       }
       _0x2d6cc3.restore();
@@ -23044,6 +23028,7 @@ class Projectile {
         "flip": !_0x3837ec.pic.spin && _0x44cc51
       })) return;
     }
+    if (drawCharacterProjectile(_0x52b48a, this, _0x27d845, _0x3be2a6)) return;
     if (_0x3837ec.spr === "crystal") {
       const _0x4dce2c = this.vx < 0;
       if (queueSpriteEffect("slash", _0x5f5a76, _0x14bf91, 40, {
@@ -24121,6 +24106,8 @@ class Player {
     const _0x4dfd12 = this.frame(), _0x1e1d94 = this.state === "dead" && this.deadT > 14, _0x258d9f = this.state === "dead" && Bc(this.def.id), _0x14657e = _0x258d9f ? "dead" : this.pose();
     const _0x64ff73 = this.room.demoNoHD ? null : getCharacterSprite(this.def.id, _0x14657e, {
       "t": this.animT,
+      "cycleSince": this.hdMotionSince,
+      "kind": this.state === 'act' ? this.actKind : undefined,
       "since": _0x258d9f ? this.deadT : this.hdSince,
       "prev": this.hdPrev
     }, !0), _0x2be6ab = Math.round(this.cx - 24 - _0xd990d9), _0x487e4e = Math.round(this.b.y + this.b.h - 44 - _0x2eb7b9), _0x1f386c = this.room.build.buffs.get(data_ha), _0x5de136 = _0x1f386c ? _0x1f386c.until - this.room.build.time : 0;
@@ -24160,10 +24147,11 @@ class Player {
           "flip": this.facing < 0,
           "alpha": _0x1f2924.globalAlpha,
           "vflip": _0x1f19c7,
-          "rot": _0x1e1d94 && !_0x258d9f ? {
+          "rot": this.state === 'dead' && CHARACTER_ART[this.def.id] || _0x1e1d94 && !_0x258d9f ? {
             "ox": 24,
             "oy": 44,
-            "a": (this.facing > 0 ? -1 : 1) * Math.PI / 2
+            "a": (this.facing > 0 ? -1 : 1) * Math.PI / 2 * (CHARACTER_ART[this.def.id] ? Math.min(1,Math.max(0,(this.deadT-4)/18)) : 1),
+            "anchorY": CHARACTER_ART[this.def.id] ? 44 : 38
           } : void 0
         });
         return;
@@ -26901,6 +26889,7 @@ class CombatRoom {
   }
   addProj(_0x176259, _0x154a2d, _0x57baa0, _0xbd9096, _0x1feca3, _0x37d260, _0x7d3e6a) {
     const _0x12cb2d = new Projectile(_0x176259, _0x154a2d, _0x57baa0, _0xbd9096, _0x1feca3, _0x37d260, _0x7d3e6a);
+    if (_0x176259 === 'player' && CHARACTER_ART[this.player.def.id]) _0x12cb2d.artId = this.player.def.id;
     return (this.projs.push(_0x12cb2d), _0x12cb2d);
   }
   groundedField(_0xc41b43, _0x1d2ef1, _0x47a06c, _0x7542b2) {

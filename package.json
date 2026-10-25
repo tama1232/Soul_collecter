@@ -1,6 +1,6 @@
 {
   "name": "soul-collecter",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "private": true,
   "type": "module",
   "description": "Soul collecter — modular Canvas action roguelite",

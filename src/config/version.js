@@ -1,1 +1,1 @@
-export const GAME_VERSION = 'soul-collecter-0.7.1';
+export const GAME_VERSION = 'soul-collecter-0.7.2';

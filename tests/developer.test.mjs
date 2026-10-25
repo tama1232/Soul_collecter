@@ -76,15 +76,17 @@ test('selected seven-star weapon receives exactly half of the seven-star pool wi
  assert.equal(normalRates(false).find(([rarity])=>rarity===7)[1],.0003);
 });
 
-test('Nemea has 1.5x prototype stats, requested cooldowns and bounded combat effects',()=>{
+test('Nemea has eight-star stats and a dedicated grimoire kit',()=>{
  const hero=CHARACTERS.anima,base=CHARACTERS.caelus;
  assert.equal(hero.name,'네메아');assert.equal(hero.title,'타락한 신의 파편');assert.equal(hero.rarity,8);
- assert.equal(hero.atk,base.atk*1.5);assert.equal(hero.hp,base.hp*1.5);
- assert.deepEqual(hero.skills.map(skill=>skill.cd),[8,10]);assert.equal(hero.ult.cd,45);
- assert.equal(hero.skills[0].act.ev.filter(event=>event.m).reduce((n,event)=>n+event.m,0),base.skills[0].act.ev.filter(event=>event.m).reduce((n,event)=>n+event.m,0));
- assert.equal(hero.passive.effects[0].stats.dmgTaken,-.1);
- assert.ok(hero.ult.act.ev.some(event=>event.k==='heal'&&event.v===.2));
+ assert.equal(hero.atk,100);assert.equal(hero.hp,500);
+ assert.deepEqual(hero.skills.map(skill=>skill.cd),[5,9]);assert.equal(hero.ult.cd,24);
+ assert.equal(hero.type,'magic');assert.equal(hero.look.weapon,'orb');
+ assert.notDeepEqual(hero.skills[0].act,base.skills[0].act);
+ assert.equal(hero.passive.effects[0].stats.dmgTaken,-.35);
+ assert.ok(hero.ult.act.ev.some(event=>event.k==='heal'&&event.v===1));
  assert.equal(WEAPONS.nemea_requiem.owner,'anima');assert.equal(WEAPONS.nemea_requiem.rarity,8);
+ assert.equal(WEAPONS.nemea_requiem.icon,'book');
 });
 
 test('client developer tools bind to authenticated UID and report settings/file mismatches',async()=>{

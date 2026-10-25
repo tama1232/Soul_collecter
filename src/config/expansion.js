@@ -1,4 +1,5 @@
 import {getProbabilities} from './live-rules.js';
+import {createNemea,createNemeaWeapon} from './nemea.js';
 /** Soul collecter expansion rules. Rates are fractions (0.001% = 0.00001). */
 export const EIGHT_HERO_ID = 'anima';
 export const HIDDEN_BOSS_ID = 'soul_archon';
@@ -81,29 +82,11 @@ export function collectionBonds(definitions, characters, owned) {
 export const EIGHT_WEAPON_ID='nemea_requiem';
 export function eightContentVisible(save,item) {return item?.rarity!==8 || save.eightUnlocked===true;}
 export function hiddenAchievement(save,id) {return !save.eightUnlocked&&['soul_gate','soul_collecter','soul_awaken'].includes(id.replace(/^title_/,''));}
-export function makeEightHero(base,ranged) {
- const hero=structuredClone(base);
- Object.assign(hero,{id:EIGHT_HERO_ID,name:'네메아',title:'타락한 신의 파편',rarity:8,allElements:true,crests:ALL_CRESTS,
-   lore:'오래전 타락한 뒤 사라진 존재. 그 이름조차 잊힌 자리에서, 부서진 영혼 하나가 미약한 기척을 남긴다. 네메아는 자신이 누구였는지 기억하지 못한다.',atk:base.atk*1.5,hp:base.hp*1.5,fx:'#fff1b8'});
- Object.assign(hero.look,{body:'#241d34',trim:'#ffdd8a',hair:'#fff1c4',eye:'#ffe080',wcol:'#fff1b8',wcol2:'#aa6cff',cape:'#181522',glow:'#ffdc90'});
- hero.combo=[structuredClone(base.combo[0]),structuredClone(ranged.combo[0]),structuredClone(base.combo.at(-1))];
- // Base attack is already 1.5x: use normal 7-star action multipliers, without another 5x multiplier.
- hero.skills.forEach((skill,index)=>{
-   skill.name=['잔흔 베기','무너진 성역'][index];skill.cd=[8,10][index];
-   skill.desc=['남아 있는 힘을 칼날에 모아 베어낸다.','사라진 성역의 흔적을 펼쳐 주위의 적을 공격한다.'][index];
- });
- if(hero.ult) {
-   hero.ult.name='사라진 신의 메아리';hero.ult.cd=45;
-   hero.ult.desc='흩어진 잔재를 모아 연속 공격한다. 최대 체력 20% 회복, 25% 보호막.';
-   hero.ult.act.ev.push({t:0,k:'heal',v:.2},{t:1,k:'shield',v:.25});
- }
- hero.passive={name:'희미한 기척',desc:'모든 문장 취급 · 모든 피해 +10%, 받는 피해 -10% · 공격 시 다섯 상태이상 순환',effects:[{stats:{allDmg:.10,dmgTaken:-.10}}]};
- return hero;
+export function makeEightHero(base) {
+ return createNemea(base,ALL_CRESTS);
 }
 export function makeEightWeapon() {
- return {id:EIGHT_WEAPON_ID,name:'잔영검 「레퀴엠」',rarity:8,owner:EIGHT_HERO_ID,crest:['soul','shadow'],atk:33,icon:'sword',col:'#e1c5ff',scale:.1,ref:{e:0,dm:true},
-   desc:'스킬 피해 +20%, 받는 피해 -8%',effects:[{stats:{skillDmg:.2,dmgTaken:-.08}}],
-   sig:[{stats:{atk:.1}}],sigMods:[{target:'skill1',dmg:.2},{target:'skill2',dmg:.2}],sigDesc:'네메아: 공격 +10% · 잔흔 베기/무너진 성역 피해 +20%'};
+ return createNemeaWeapon();
 }
 export function makeHiddenBoss(base) {
   return {...structuredClone(base),id:HIDDEN_BOSS_ID,name:'영혼의 집정관',title:'다섯 봉인의 파수꾼',orb:true,flying:true,split:false,

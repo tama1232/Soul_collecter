@@ -21178,7 +21178,7 @@ const definition_fortune = {
   pieces: ["gambler_dice", "golden_idol", "kings_seal"],
   tiers: [_0x36df11, _0x2e239a]
 };
-re.push(makeEightHero(re.find(hero => hero.id === "caelus"), re.find(hero => hero.id === "hanbyeol")));
+re.push(makeEightHero(re.find(hero => hero.id === "caelus")));
 const T = Object.fromEntries(re.map(_0x1d396d => [_0x1d396d.id, _0x1d396d])), pe = "kael", ue = "rusty_blade", Gr = _0x16c3e6, Nr = _0x311c77, Kr = _0x450335, ye = [definition_inferno, definition_feast, definition_tempest, definition_nightblade_199944, definition_citadel, definition_berserker, definition_herald_432a27, definition_reaper, definition_plague, definition_winter, definition_fortune], Ir = Object.fromEntries(ye.map(_0xb2ab5b => [_0xb2ab5b.id, _0xb2ab5b])), ba = Object.fromEntries(ye.flatMap(_0x62d58e => _0x62d58e.pieces.map(_0x454da9 => [_0x454da9, _0x62d58e])));
 function $r(_0x38ed39) {
   const _0x511fc8 = [];

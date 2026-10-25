@@ -1,0 +1,21 @@
+{
+  "source_01": ["anima", "solen", "astral", "ashen"],
+  "source_02": ["baekya", "hanbyeol", "caelus", "lucas"],
+  "source_03": ["enoch", "luciel", "aurel", "vega"],
+  "source_04": ["flora", "gambler", "lumien", "jax"],
+  "source_05": ["heukwol", "elin", "arien"],
+  "source_06": ["nigel", "helga", "vella", "orin"],
+  "source_07": ["ignia", "lea", "garon", "silva"],
+  "source_07_additional": {
+    "file": "source_07/source7-세레스,드라칸,아스트라,마리오네.png",
+    "asset": "additional-four.png",
+    "rows": ["seres", "drakan", "astera", "marionne"],
+    "boundaries": [0, 272, 484, 690, 887]
+  },
+  "source_08": ["seraph", "kaz", "bron", "liora"],
+  "source_09": ["balt", "sien", "morga", "aurelia"],
+  "source_10": ["eora", "seira", "bram", "jolly"],
+  "source_11": ["selin", "nox", "raika", "hawin"],
+  "source_12": ["freya", "kael", "rina", "bor"],
+  "source_13": ["dor", "lyra", "kai", "bern", "bolt"]
+}
